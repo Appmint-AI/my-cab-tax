@@ -1,0 +1,37 @@
+You should present this as a Certificate of Protection within the app.
+
+The MCTUSA Audit Defense Guarantee
+
+"We stand behind your data."
+
+If the IRS or state tax authorities audit your 2026 return, My Cab Tax USA provides the following professional support at no additional cost to Pro users:
+
+1. The "Vault" Evidence Package: We will generate a certified, time-stamped dossier of every receipt, mileage log, and 1099-K reconciliation stored in your account.
+
+2. Auditor Documentation Support: Our system will generate the specific Form 4564 (Information Document Request) responses required by the IRS for vehicle and business expenses.
+
+3. Professional Guidance: You will receive a step-by-step "Audit Response Roadmap" explaining exactly how to present your MCTUSA records to an IRS examiner.
+
+4. Data Integrity Warranty: If a calculation error in our software directly causes an IRS penalty, we will reimburse you for the penalty amount (up to $500).*
+
+Disclaimer: MCTUSA does not provide legal representation or "Power of Attorney" in tax court. We provide the evidence and the tools; you provide the truth.
+
+🛠️ Instructions for the Replit Agent
+To make this "real" in the code, the Agent needs to build the Audit Response Portal.
+
+Tell the Replit Agent:
+
+"Create a new route /audit-center.
+
+The 'Panic Button': Add a button: 'Received an IRS Letter? Start Here.'
+
+Upload Portal: Allow users to upload a photo of their IRS Notice.
+
+Automatic Dossier: When clicked, the app should instantly bundle all receipts, the 'Gross-Up' math logic, and the contemporaneous mileage logs into a single 'IRS Audit Evidence PDF'.
+
+Watermark: Every page of this PDF must be watermarked: 'Verified Record - Stored in MCTUSA Immutable Vault.'"
+
+📈 Why this makes you "Un-installable"
+Drivers are terrified of the IRS. By offering this guarantee, you move from being a "utility" to being a protector.
+
+Marketing Tip: On your website, put a badge that says: "IRS-Audit Protected." * The "Lock-In" Effect: Once a driver has 3 years of records in your "Vault" under this guarantee, they will never leave your app for a competitor.

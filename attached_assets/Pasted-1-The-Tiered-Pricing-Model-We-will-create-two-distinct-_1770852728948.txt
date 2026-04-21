@@ -1,0 +1,63 @@
+1. The Tiered Pricing Model
+We will create two distinct plans in the Stripe Dashboard to manage this:
+
+Basic (Free): Manual entry only. Drivers type in their own gross income and fees.
+
+Pro (Paid): Unlocks the "Smart Sales Importer" (Auto-Grossing) and the 7-year Tax Vault.
+
+Tell the Replit Agent:
+
+"In the user database, add a subscription_tier field (default: 'basic'). Create a middleware function checkProAccess that guards the /api/income/auto-gross endpoint. If a user is not 'pro', return a 403 error with a message: 'Upgrade to Pro to unlock Auto-Grossing for Uber and Lyft.'"
+
+2. Implementing the "Auto-Grossing" Logic
+Since you want to charge for this, the UI should act as an "Upsell" the moment they try to use it.
+
+The Logic for the Replit Agent:
+
+"Build the Income Entry screen with two tabs: 'Manual' and 'Auto-Import (Pro)'.
+
+If 'Auto-Import' is clicked by a Basic user, show a 'locked' state with a button: 'Upgrade to Pro for Automatic 1099-K Matching'.
+
+For Pro users, implement the 25% Gross-Up Math:
+
+Input: Net Payout (e.g., $750).
+
+Calculated Gross: Net / 0.75 ($1,000).
+
+Calculated Fee: Gross - Net ($250).
+
+Save these as two separate records: one as Income and one as Expense (Platform Fees)."
+
+3. Stripe Integration (The "Paywall")
+To make the feature actually generate revenue, we need the "Upgrade" flow.
+
+The Instruction for the Replit Agent:
+
+"Create a /api/stripe/create-checkout-session endpoint. When a user clicks 'Upgrade', redirect them to a Stripe Checkout page for the Pro Plan.
+
+Once payment is successful, use a Stripe Webhook (checkout.session.completed) to update the user's subscription_tier to 'pro' in our database.
+
+Once the tier is updated, immediately reveal the Auto-Grossing feature in the UI."
+
+4. The "Value Pitch" (Why they will pay extra)
+In the USA, drivers are terrified of the IRS. We sell this feature as "Audit Insurance."
+
+Marketing Copy for the Upgrade Modal:
+
+Stop Guessing Your 1099-K. "Uber and Lyft report your 'Gross Fares' to the IRS, but only pay you the 'Net.' If these don't match on your tax return, you risk an audit.
+
+Unlock Pro to:
+
+Automatically Gross-Up: We do the math to ensure your records match your 1099-K perfectly.
+
+Auto-Deduct Fees: Instantly categorize platform commissions to maximize your deductions.
+
+7-Year Vault: Secure storage that lasts as long as the IRS statute of limitations."
+
+5. Summary of Paid vs. Free Features
+Feature	Basic (Free)	Pro (Paid)
+Manual Expense Entry	✅ Included	✅ Included
+Mileage Tracking	✅ Included	✅ Included
+Auto-Grossing (25% Rule)	❌ Locked	✅ Unlocked
+1099-K Matcher	❌ Locked	✅ Unlocked
+Data Retention	90 Days	7 Years

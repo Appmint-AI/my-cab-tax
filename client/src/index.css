@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* ── Modern Fintech: Light Mode ── */
+  --background: 210 20% 98%;
+  --foreground: 216 65% 11%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 216 65% 11%;
+  --card-border: 214 25% 90%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 216 65% 11%;
+  --popover-border: 214 25% 90%;
+
+  --primary: 160 100% 36%;
+  --primary-foreground: 0 0% 100%;
+  --primary-border: 160 80% 30%;
+
+  --secondary: 210 25% 93%;
+  --secondary-foreground: 216 65% 11%;
+  --secondary-border: 210 20% 87%;
+
+  --muted: 210 25% 93%;
+  --muted-foreground: 215 16% 47%;
+  --muted-border: 210 20% 87%;
+
+  --accent: 160 100% 36%;
+  --accent-foreground: 0 0% 100%;
+  --accent-border: 160 80% 30%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --destructive-border: 0 72% 50%;
+
+  --border: 214 25% 90%;
+  --input: 214 25% 90%;
+  --ring: 160 100% 36%;
+
+  --radius: 0.375rem;
+
+  /* Sidebar */
+  --sidebar: 216 65% 11%;
+  --sidebar-foreground: 210 25% 85%;
+  --sidebar-border: 217 50% 16%;
+  --sidebar-ring: 160 100% 36%;
+  --sidebar-primary: 160 100% 36%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-primary-border: 160 80% 30%;
+  --sidebar-accent: 217 50% 16%;
+  --sidebar-accent-foreground: 210 25% 93%;
+  --sidebar-accent-border: 217 45% 20%;
+
+  /* Charts */
+  --chart-1: 160 100% 36%;
+  --chart-2: 200 85% 45%;
+  --chart-3: 43 100% 50%;
+  --chart-4: 270 60% 55%;
+  --chart-5: 25 100% 50%;
+
+  /* Segment accent (overridden by data-segment attribute) */
+  --segment-accent: 160 100% 36%;
+  --segment-accent-foreground: 0 0% 100%;
+}
+
+.dark {
+  /* ── Modern Fintech: Dark Mode (Midnight Navy) ── */
+  --background: 216 65% 8%;
+  --foreground: 210 25% 93%;
+
+  --card: 216 55% 12%;
+  --card-foreground: 210 25% 93%;
+  --card-border: 217 45% 18%;
+
+  --popover: 216 55% 12%;
+  --popover-foreground: 210 25% 93%;
+  --popover-border: 217 45% 18%;
+
+  --primary: 160 100% 40%;
+  --primary-foreground: 216 65% 8%;
+  --primary-border: 160 80% 34%;
+
+  --secondary: 217 40% 16%;
+  --secondary-foreground: 210 25% 93%;
+  --secondary-border: 217 35% 20%;
+
+  --muted: 217 40% 16%;
+  --muted-foreground: 215 20% 60%;
+  --muted-border: 217 35% 20%;
+
+  --accent: 160 100% 40%;
+  --accent-foreground: 216 65% 8%;
+  --accent-border: 160 80% 34%;
+
+  --destructive: 0 72% 45%;
+  --destructive-foreground: 0 0% 100%;
+  --destructive-border: 0 60% 38%;
+
+  --border: 217 45% 18%;
+  --input: 217 45% 18%;
+  --ring: 160 100% 40%;
+
+  /* Sidebar (deeper navy) */
+  --sidebar: 216 70% 6%;
+  --sidebar-foreground: 210 25% 80%;
+  --sidebar-border: 217 50% 12%;
+  --sidebar-ring: 160 100% 40%;
+  --sidebar-primary: 160 100% 40%;
+  --sidebar-primary-foreground: 216 65% 8%;
+  --sidebar-primary-border: 160 80% 34%;
+  --sidebar-accent: 217 50% 14%;
+  --sidebar-accent-foreground: 210 25% 93%;
+  --sidebar-accent-border: 217 45% 18%;
+
+  /* Charts */
+  --chart-1: 160 100% 40%;
+  --chart-2: 200 85% 50%;
+  --chart-3: 43 100% 55%;
+  --chart-4: 270 60% 60%;
+  --chart-5: 25 100% 55%;
+
+  --segment-accent: 160 100% 40%;
+  --segment-accent-foreground: 216 65% 8%;
+}
+
+/* ── Segment Theming Engine ── */
+/* Taxi / Rideshare: Caution Yellow (#FFB800) */
+[data-segment="taxi"] {
+  --segment-accent: 43 100% 50%;
+  --segment-accent-foreground: 216 65% 11%;
+}
+[data-segment="taxi"] .dark,
+.dark[data-segment="taxi"] {
+  --segment-accent: 43 100% 50%;
+  --segment-accent-foreground: 216 65% 8%;
+}
+
+/* Delivery Courier: Speed Orange (#FF6B00) */
+[data-segment="delivery"] {
+  --segment-accent: 25 100% 50%;
+  --segment-accent-foreground: 0 0% 100%;
+}
+[data-segment="delivery"] .dark,
+.dark[data-segment="delivery"] {
+  --segment-accent: 25 100% 55%;
+  --segment-accent-foreground: 0 0% 100%;
+}
+
+/* Hybrid: Growth Green (default primary) */
+[data-segment="hybrid"] {
+  --segment-accent: 160 100% 36%;
+  --segment-accent-foreground: 0 0% 100%;
+}
+[data-segment="hybrid"] .dark,
+.dark[data-segment="hybrid"] {
+  --segment-accent: 160 100% 40%;
+  --segment-accent-foreground: 216 65% 8%;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/20;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-semibold tracking-tight;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/15 rounded-full hover:bg-muted-foreground/25 transition-colors;
+}
+
+/* Segment accent utility classes */
+@layer utilities {
+  .bg-segment-accent {
+    background-color: hsl(var(--segment-accent));
+  }
+  .text-segment-accent {
+    color: hsl(var(--segment-accent));
+  }
+  .text-segment-accent-foreground {
+    color: hsl(var(--segment-accent-foreground));
+  }
+  .border-segment-accent {
+    border-color: hsl(var(--segment-accent));
+  }
+  .ring-segment-accent {
+    --tw-ring-color: hsl(var(--segment-accent));
+  }
+}

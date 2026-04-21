@@ -1,0 +1,53 @@
+1. The "1099-K Mismatch" Logic
+
+The #1 reason 1099-K drivers get audited is when the Gross Receipts on their tax return are lower than the 1099-K form the IRS already has in its database.
+
+Tell the Replit Agent:
+
+"Add a Cross-Check Validation:
+
+If the user has uploaded a 1099-K, the app must compare the 'Gross Receipts' field (Line 1 of Schedule C) against the 'Box 1a' value from the 1099-K.
+
+Warning Trigger: If the app's total is lower than the 1099-K amount, show a high-priority alert: 'Your reported income is lower than your 1099-K. This is an automatic audit trigger. Did you account for all platform fees and gross-ups?'"
+
+2. The "Non-Zero" Integrity Check
+
+The IRS Modernized e-File (MeF) system will instantly reject a return if certain "significant" fields are missing or logically impossible for a driver.
+
+Tell the Replit Agent:
+
+"Add an IRS Schema Integrity Check before finalization:
+
+Ensure Line 1 (Gross Receipts), Line 7 (Gross Income), and Line 31 (Net Profit) are all non-zero.
+
+Zip Code Match: Validate that the first 5 digits of the user's zip code match the state abbreviation they provided (using a standard US Zip-to-State map).
+
+Phone Number Format: Ensure the daytime phone number is not all zeros or blanks, as this is a common 2026 rejection code (FPYMT-040)."
+
+3. The "Contemporaneous" Mileage Timestamp
+
+For the 2026 tax year, the IRS is cracking down on "estimated" mileage. They want proof the log was created as the miles were driven, not at the end of the year.
+
+Tell the Replit Agent:
+
+"Update the Mileage Log Metadata:
+
+For every mileage entry, the database must store an immutable_created_at timestamp.
+
+In the final Audit PDF, add a 'Log Integrity Certificate' stating: 'This log contains [X] entries with real-time timestamps, fulfilling the IRS requirement for contemporaneous record-keeping.'"
+
+The "Finalization" Flow: The Handshake
+
+Before the user pays their $50, the "Finalization" flow should look like a professional "Pre-Flight Check."
+
+Final Request for Replit:
+
+"Build a 'Pre-Flight Dashboard' for the Finalization Flow.
+
+Show a progress bar that only hits 100% once the ID is verified, the 1099-K is matched, and the mileage log is complete.
+
+Once at 100%, show the 'Perjury Disclaimer' and the 'Pay & File' button.
+
+After payment, generate a 'Unique Filing ID' (a hash of their data) that is watermarked onto every page of their PDF to prove the document hasn't been altered after the fact."
+
+Next Step for You:

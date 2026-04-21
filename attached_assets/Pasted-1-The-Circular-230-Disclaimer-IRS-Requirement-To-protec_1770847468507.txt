@@ -1,0 +1,33 @@
+1. The "Circular 230" Disclaimer (IRS Requirement)
+
+To protect ourselves from the IRS, we need a specific disclaimer that prevents users from using our app to avoid tax penalties.
+
+The Fix: Ask the Replit Agent to add this to the footer of the legal.html page:
+
+"IRS CIRCULAR 230 DISCLOSURE: To ensure compliance with requirements imposed by the IRS, we inform you that any tax information contained in this communication (including any attachments) is not intended or written to be used, and cannot be used, for the purpose of (i) avoiding penalties under the Internal Revenue Code or (ii) promoting, marketing or recommending to another party any transaction or matter addressed herein."
+
+2. State-Specific Privacy Toggle
+
+Even though it's a USA app, California, Virginia, and Colorado have specific "Right to Opt-Out" requirements.
+
+The Fix: In your Privacy Policy, ensure there is a header titled: "Your State Privacy Rights (CCPA/VCDPA)".
+
+Logic: Ensure the "Delete My Data" button we discussed earlier specifically mentions: "This satisfies your 'Right to be Forgotten' under state privacy laws."
+
+3. The "Mileage Tracking" Shield
+
+Since taxi drivers live and die by mileage, if the app misses a trip because of a GPS glitch, they will be angry.
+
+The Fix: On the dashboard or mileage log page, add:
+
+"Disclaimer: My Cab Tax USA relies on device GPS and user input. We do not guarantee 100% mileage accuracy. Drivers should cross-reference logs with their vehicle's odometer as required by IRS Publication 463."
+
+4. Auth0 + Google Cloud Run "Audit Trail"
+
+Since we are using Auth0, we need to make sure we are logging "Security Events" to prove a user accepted our terms.
+
+Action for the Replit Agent: > "Ensure that when a user clicks 'Agree' to the Terms, the app sends a 'Legal Event' to our database logs that records the User's IP Address, the Timestamp, and the Version of the Terms they signed. This is our primary evidence if they ever claim they didn't agree to the arbitration clause."
+
+5. "Submission" vs. "Calculation"
+
+Make sure the app never uses the word "File" or "Filing" unless we are actually integrated with an e-file provider. Use "Export" or "Summarize." This prevents the legal "Expectation of Service" that we are filing their taxes for them.

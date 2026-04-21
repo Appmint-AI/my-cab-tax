@@ -1,0 +1,109 @@
+{
+  "nav": {
+    "dashboard": "Dasbor",
+    "income": "Pendapatan",
+    "expenses": "Pengeluaran",
+    "mileage": "Jarak Tempuh",
+    "receipts": "Kuitansi",
+    "vehicles": "Kendaraan",
+    "export": "Ekspor",
+    "auditDefense": "Pertahanan Audit",
+    "settings": "Pengaturan",
+    "dac7": "Alat DAC7",
+    "currency": "Mata Uang",
+    "sync": "Sinkronisasi Gig",
+    "signOut": "Keluar",
+    "quarterly": "Laporan Triwulan",
+    "estimatedTax": "Pajak Estimasi",
+    "taxOverview": "Ikhtisar Pajak"
+  },
+  "common": {
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "edit": "Edit",
+    "add": "Tambah",
+    "search": "Cari",
+    "filter": "Filter",
+    "loading": "Memuat...",
+    "noData": "Tidak ada data ditemukan",
+    "confirm": "Konfirmasi",
+    "back": "Kembali",
+    "next": "Berikutnya",
+    "submit": "Kirim",
+    "upload": "Unggah",
+    "download": "Unduh",
+    "close": "Tutup",
+    "yes": "Ya",
+    "no": "Tidak",
+    "total": "Total",
+    "date": "Tanggal",
+    "amount": "Jumlah",
+    "category": "Kategori",
+    "description": "Deskripsi",
+    "actions": "Tindakan",
+    "status": "Status",
+    "language": "Bahasa"
+  },
+  "dashboard": {
+    "title": "Dasbor",
+    "welcome": "Selamat datang kembali",
+    "taxSummary": "Ringkasan Pajak",
+    "grossIncome": "Pendapatan Kotor",
+    "totalExpenses": "Total Pengeluaran",
+    "mileageDeduction": "Potongan Jarak Tempuh",
+    "netProfit": "Laba Bersih",
+    "selfEmploymentTax": "Pajak Wiraswasta",
+    "quarterlyEstimate": "Estimasi Triwulan",
+    "quickActions": "Tindakan Cepat",
+    "addIncome": "Tambah Pendapatan",
+    "addExpense": "Tambah Pengeluaran",
+    "logMileage": "Catat Jarak Tempuh",
+    "scanReceipt": "Pindai Kuitansi",
+    "moneySaved": "Uang Tersimpan"
+  },
+  "auth": {
+    "login": "Masuk",
+    "logout": "Keluar",
+    "welcome": "Musim pajak Anda, disederhanakan"
+  },
+  "region": {
+    "detected": "Sepertinya Anda berada di {{country}}.",
+    "switchPrompt": "Apakah Anda ingin beralih ke wilayah lokal Anda?",
+    "switchRegion": "Ganti Wilayah",
+    "dismiss": "Abaikan",
+    "detecting": "Mendeteksi lokasi Anda...",
+    "permissionDenied": "Akses lokasi ditolak"
+  },
+  "expenses": {
+    "title": "Pengeluaran",
+    "addExpense": "Tambah Pengeluaran",
+    "editExpense": "Edit Pengeluaran",
+    "noExpenses": "Belum ada pengeluaran yang dicatat",
+    "merchant": "Pedagang",
+    "receipt": "Kuitansi",
+    "taxDeductible": "Dapat Dikurangkan Pajak",
+    "selectCategory": "Pilih kategori"
+  },
+  "income": {
+    "title": "Pendapatan",
+    "addIncome": "Tambah Pendapatan",
+    "editIncome": "Edit Pendapatan",
+    "noIncome": "Belum ada pendapatan yang dicatat",
+    "source": "Sumber",
+    "platform": "Platform",
+    "tips": "Tip"
+  },
+  "ai": {
+    "taxPredictor": {
+      "title": "Prediktor Pajak Cerdas",
+      "analyze": "Analisis",
+      "analyzing": "AI sedang menganalisis data keuangan Anda..."
+    },
+    "voice": {
+      "tapToSpeak": "Ketuk untuk berbicara",
+      "listening": "Mendengarkan...",
+      "processing": "Memproses..."
+    }
+  }
+}

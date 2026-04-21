@@ -1,0 +1,67 @@
+Here is how we build the submission/export module to be "IRS-Ready."
+
+1. The IRS "Category Mapping"
+We shouldn't just let drivers type in random categories. We need to force their expenses into the specific buckets the IRS uses. This makes their tax filing seamless and reduces errors.
+
+Tell the Replit Agent:
+
+"Create a 'Submissions' data model. Every expense must be categorized into one of these IRS-standard buckets:
+
+Car and Truck Expenses (Gas, oil, repairs, insurance)
+
+Commissions and Fees (Uber/Lyft/Dispatch fees)
+
+Insurance (Business-specific)
+
+Interest (Car loan interest)
+
+Legal and Professional Services (Accounting/License fees)
+
+Office Expense (Cell phone data/Supplies)
+
+Other Expenses (Water for passengers, car washes)"
+
+2. The "Mileage Log" (The #1 Audit Item)
+The IRS is strictest about mileage. A simple "total" isn't enough; they require a contemporaneous log.
+
+Tell the Replit Agent:
+
+"Build a Mileage Tracker module. For every entry, the driver must provide:
+
+Date
+
+Business Purpose (e.g., 'Shift Start to Shift End' or 'Fare to Airport')
+
+Start Odometer (Optional but recommended)
+
+End Odometer (Optional but recommended)
+
+Total Miles Logic: Include a toggle for 'Standard Mileage Rate' (e.g., 67 cents per mile for 2024/2025) vs. 'Actual Expenses'."
+
+3. The "Submission Preview" Screen
+Before they export, they need to see a "Tax Summary" that looks like a draft of their tax return.
+
+Tell the Replit Agent:
+
+"Create a 'Tax Summary' dashboard view. It should aggregate all data into a 'Year-to-Date' summary.
+
+Total Gross Income
+
+Total Deductions (Sum of all categories)
+
+Net Business Income/Loss (Gross - Deductions)
+
+Estimated Tax Liability (Simple calculation: Net Income * 15.3% for Self-Employment tax)"
+
+4. The "Export for IRS" Logic
+Since we aren't "filing" yet, we are providing the Evidence Pack.
+
+Tell the Replit Agent:
+
+"Create an 'Export' function that generates a ZIP file containing:
+
+A CSV Summary mapped to Schedule C categories.
+
+A Detailed Mileage Log in PDF format.
+
+A Receipt Folder containing all images uploaded for that tax year. Crucial: Add the legal watermark to the PDF: 'Self-Generated Record - Not Audited'."

@@ -1,0 +1,54 @@
+1. The Onboarding "Fork"
+
+When a user first opens the app after creating an account, you present a clean, high-contrast choice screen.
+
+The Replit Prompt for the Onboarding Screen:
+
+"Create an IndustryPicker component for the sign-up flow.
+
+Option A: 'I am a Taxi/Rideshare Driver' (Icon: Car/Map).
+
+Option B: 'I am a Delivery Courier' (Icon: Pizza Box/Bag).
+
+Logic: Save this selection to the user's profile as user_segment. This variable will control the rest of the app's UI."
+
+2. How the App Changes (The "Dynamic UI")
+
+Once the user_segment is set, the app will filter what the user sees to reduce "Cognitive Load" (extra noise).
+
+Feature	If user_segment == "Taxi"	If user_segment == "Delivery"
+Home Dashboard	Shows "Passenger Trips" & "Surge Earnings."	Shows "Order Deliveries" & "Tip Breakdown."
+Expense Suggestions	"Car Detailing, Passenger Snacks, TLC Fees."	"Insulated Bags, Courier Insurance, Bike Repair."
+AI Receipt Scanner	Optimized for Gas & Car Wash receipts.	Optimized for Equipment & Fast Food/Staging.
+Income 1099-K Match	Highlights Uber/Lyft/Taxi Medallion.	Highlights DoorDash/Instacart/Grubhub.
+3. Coding the "Logic Switch" (For your Developer)
+
+Tell your developer to use a simple "Guard" or "Switch" statement in the main dashboard code.
+
+Developer Instruction:
+
+"Use a global state (Redux or Context API) to store the user_segment.
+
+For the Expense Screen: If segment === 'delivery', prioritize showing the 'Equipment' category.
+
+For the Income Screen: If segment === 'taxi', show the 'No Tax on Tips' calculator specifically for passenger gratuities.
+
+Dynamic Help Text: Update the 'Pro-Tip' pop-ups to use relevant terminology (e.g., use 'Rider' for Taxi and 'Customer' for Delivery)."
+
+4. The "Expert" Touch: The Hybrid Toggle
+
+Some drivers do both (e.g., Uber rides by day, DoorDash by night).
+
+The Feature: Add a small "Switch Industry" toggle in the Profile/Settings.
+
+Why: This makes the app indispensable for the "Mega-Gig" worker. They can toggle the view to see their specific expenses for each "side-hustle" without the data getting messy.
+
+The Marketing Benefit
+
+When you run ads, you can now use two different "App Store Screenshots":
+
+Ad 1 (Taxi): Shows the dashboard with "Passenger Trip" data.
+
+Ad 2 (Delivery): Shows the dashboard with "Delivery Order" data.
+
+The user thinks they found a specialized tool, but you are maintaining one single, efficient codebase.

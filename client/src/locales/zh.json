@@ -1,0 +1,109 @@
+{
+  "nav": {
+    "dashboard": "控制台",
+    "income": "收入",
+    "expenses": "支出",
+    "mileage": "里程",
+    "receipts": "收据",
+    "vehicles": "车辆",
+    "export": "导出",
+    "auditDefense": "审计防御",
+    "settings": "设置",
+    "dac7": "DAC7工具",
+    "currency": "货币",
+    "sync": "零工同步",
+    "signOut": "退出登录",
+    "quarterly": "季度申报",
+    "estimatedTax": "预估税款",
+    "taxOverview": "税务概览"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "add": "添加",
+    "search": "搜索",
+    "filter": "筛选",
+    "loading": "加载中...",
+    "noData": "未找到数据",
+    "confirm": "确认",
+    "back": "返回",
+    "next": "下一步",
+    "submit": "提交",
+    "upload": "上传",
+    "download": "下载",
+    "close": "关闭",
+    "yes": "是",
+    "no": "否",
+    "total": "合计",
+    "date": "日期",
+    "amount": "金额",
+    "category": "类别",
+    "description": "描述",
+    "actions": "操作",
+    "status": "状态",
+    "language": "语言"
+  },
+  "dashboard": {
+    "title": "控制台",
+    "welcome": "欢迎回来",
+    "taxSummary": "税务摘要",
+    "grossIncome": "总收入",
+    "totalExpenses": "总支出",
+    "mileageDeduction": "里程扣除",
+    "netProfit": "净利润",
+    "selfEmploymentTax": "自雇税",
+    "quarterlyEstimate": "季度预估",
+    "quickActions": "快速操作",
+    "addIncome": "添加收入",
+    "addExpense": "添加支出",
+    "logMileage": "记录里程",
+    "scanReceipt": "扫描收据",
+    "moneySaved": "节省金额"
+  },
+  "auth": {
+    "login": "登录",
+    "logout": "退出",
+    "welcome": "您的报税季，简化版"
+  },
+  "region": {
+    "detected": "您似乎在{{country}}。",
+    "switchPrompt": "是否切换到您的本地区域？",
+    "switchRegion": "切换区域",
+    "dismiss": "忽略",
+    "detecting": "正在检测您的位置...",
+    "permissionDenied": "位置访问被拒绝"
+  },
+  "expenses": {
+    "title": "支出",
+    "addExpense": "添加支出",
+    "editExpense": "编辑支出",
+    "noExpenses": "暂无支出记录",
+    "merchant": "商家",
+    "receipt": "收据",
+    "taxDeductible": "可抵税",
+    "selectCategory": "选择类别"
+  },
+  "income": {
+    "title": "收入",
+    "addIncome": "添加收入",
+    "editIncome": "编辑收入",
+    "noIncome": "暂无收入记录",
+    "source": "来源",
+    "platform": "平台",
+    "tips": "小费"
+  },
+  "ai": {
+    "taxPredictor": {
+      "title": "智能税务预测",
+      "analyze": "分析",
+      "analyzing": "AI正在分析您的财务数据..."
+    },
+    "voice": {
+      "tapToSpeak": "点击说话",
+      "listening": "正在聆听...",
+      "processing": "正在处理..."
+    }
+  }
+}

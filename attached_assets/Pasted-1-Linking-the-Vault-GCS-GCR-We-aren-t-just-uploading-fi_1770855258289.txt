@@ -1,0 +1,69 @@
+1. Linking the "Vault" (GCS + GCR)
+
+We aren't just uploading files; we are "mounting" the storage. This allows your app to treat the Google Cloud bucket like a local hard drive folder, which is much faster for the driver.
+
+Tell the Replit Agent:
+
+"I want to link my Google Cloud Run service to Google Cloud Storage using Volume Mounts.
+
+Create a bucket named mycabtax-usa-vault.
+
+Mount this bucket to the Cloud Run service at the path /mnt/receipts.
+
+Update the storage logic: When a Pro user saves a receipt, write the file directly to /mnt/receipts/{userId}/{taxYear}/{fileName}.jpg.
+
+Set a Lifecycle Rule on the bucket to automatically archive files after 7 years to save on storage costs."
+
+2. The AI Camera UI & OCR
+
+Since we are using the Google Cloud Vision API, the app will "read" the receipt while the driver is still at the gas station.
+
+Tell the Replit Agent:
+
+"Build the /scan route using react-webcam.
+
+Create a mobile camera interface with a 'Capture' button.
+
+Once snapped, send the image to the /api/ocr backend.
+
+Use the Vision API (TEXT_DETECTION) to extract:
+
+Merchant Name (e.g., 'ExxonMobil')
+
+Total Amount (e.g., '54.20')
+
+Date (e.g., 'Feb 12, 2026')
+
+Auto-populate the 'New Expense' form with these values and show a 'Verify & Save' button."
+
+3. Setting up your Service Account Key
+
+To make items 1 and 2 work, the Replit Agent needs "permission" to talk to Google. You need to generate a JSON Secret Key.
+
+Your Quick Action Plan:
+
+IAM & Admin: Go to the Google Cloud Console.
+
+Service Accounts: Create a new account named mycabtax-app-engine.
+
+Roles: Grant it Storage Admin and Cloud Vision AI User.
+
+Keys: Click Add Key > Create New Key > JSON.
+
+Replit: Open your Replit secrets and paste the entire content of that JSON file into a variable called GOOGLE_APPLICATION_CREDENTIALS.
+
+4. Custom Domain & SSL (The Final Step)
+
+To use the camera on a smartphone, the browser requires HTTPS. Google Cloud Run handles the SSL for you, but you must point your domain to it.
+
+Tell the Replit Agent:
+
+"Help me configure the custom domain. Once I add my domain app.mycabtax.com in the Google Cloud Console, I will provide the A Records and CNAME records. Please ensure the app redirects all HTTP traffic to HTTPS so the camera function isn't blocked by the browser."
+
+Strategic Build Order:
+
+Storage First: Mount the bucket so we have a place to put files.
+
+The Scanner: Implement the React Camera + AI reading.
+
+The Paywall: Link the "Scan" button to the Stripe Pro check.

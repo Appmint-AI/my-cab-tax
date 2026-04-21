@@ -1,0 +1,59 @@
+1. The "Upgrade to Pro" Marketing Copy
+This is designed to nudge drivers from the "90-day risk" to "7-year safety."
+
+Headline: 🛡️ Don't Let the IRS (or HMRC) Catch You Empty-Handed.
+
+Body:
+
+"Did you know the IRS can audit your records up to 3 years back? If you've under-reported, that window can jump to 6 years.
+
+On our Free Tier, your data is cleared after 90 days of inactivity to protect your privacy. Don't risk losing your deductions and receipts when you need them most.
+
+Upgrade to 'My Cab Tax Pro' for only [$Price]:
+
+The Tax Vault: We securely store your records for a full 7 years.
+
+Audit-Ready Exports: One-click PDF reports for the IRS/HMRC.
+
+Receipt Backup: Unlimited photo storage for every gas station and repair bill.
+
+[Lock In My Records Now]"
+
+2. The "Contact Support" Legal Template
+If a driver has a legal question or a formal data request, we shouldn't handle it casually. We need a professional gateway.
+
+Tell the Replit Agent:
+
+"Create a 'Legal & Privacy Support' form. Instead of a generic email, use a dropdown menu for 'Nature of Inquiry' with options:
+
+Data Export Request (GDPR/CCPA)
+
+Account Deletion Inquiry
+
+Dispute Resolution/Arbitration
+
+Report a Security Concern
+
+This form should send an email to legal@mycabtaxusa.com with the user's Auth0 ID automatically attached to the metadata."
+
+3. The "Soft Delete" Logic (For Replit/Cloud Run)
+Since you weren't sure about the DB structure, let's tell the Agent to build it the safe way.
+
+Tell the Replit Agent:
+
+"Modify the database schema to include a deleted_at (timestamp) and is_active (boolean) column. When a user clicks 'Delete Account':
+
+Set is_active to false.
+
+Set deleted_at to the current time.
+
+The 'Soft Delete' Rule: Modify the Auth0 login flow so these users can no longer log in.
+
+The 'Hard Delete' Task: Create a script for Google Cloud Run that runs once a week and permanently purges any records where deleted_at is older than 30 days."
+
+4. Why this works for us
+The Soft Delete: Saves us from "I accidentally deleted my life" support tickets.
+
+The 7-Year Pitch: It’s not just storage; it’s "Audit Insurance."
+
+The Support Form: Filters out "how do I change my password" from actual legal threats, so you can prioritize the important stuff.

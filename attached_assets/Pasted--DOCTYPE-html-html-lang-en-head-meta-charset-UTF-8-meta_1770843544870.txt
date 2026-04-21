@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal - My Cab Tax USA</title>
+    <link rel="stylesheet" href="legal.css">
+</head>
+<body>
+    <div class="legal-container">
+        <h1>Legal Center - My Cab Tax USA</h1>
+        
+        <section class="disclaimer-box">
+            <h2>⚠️ IMPORTANT: TAX DISCLAIMER</h2>
+            <p><strong>My Cab Tax USA is a bookkeeping tool, NOT a tax advisory service.</strong> We do not provide professional tax, legal, or accounting advice. This software is designed for informational and organizational purposes only. You should consult with a qualified CPA or Tax Attorney before filing any returns with the IRS.</p>
+        </section>
+
+        <section>
+            <h2>1. Terms of Service</h2>
+            <p>By using My Cab Tax USA, you agree that we are not liable for any IRS audits, penalties, or interest resulting from your use of this app. Accuracy of data entry is the sole responsibility of the driver.</p>
+            <h3>Mandatory Arbitration</h3>
+            <p>Any disputes will be resolved through individual binding arbitration in [Your State], USA. You waive your right to participate in a class-action lawsuit.</p>
+        </section>
+
+        <section>
+            <h2>2. Privacy Policy (GLBA & CCPA Compliant)</h2>
+            <p>We collect financial data and mileage logs to provide our services. We do not sell your personal financial data to third parties. We use industry-standard encryption to protect your Social Security Number (SSN) and bank information.</p>
+        </section>
+
+        <section>
+            <h2>3. Limitation of Liability</h2>
+            <p>To the maximum extent permitted by law, My Cab Tax USA’s total liability shall not exceed the amount paid by the user for the service in the last 12 months, or $100, whichever is less.</p>
+        </section>
+        
+        <a href="/" class="back-btn">Back to App</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+Since we are in the high-stakes month of January, drivers are usually stressed. Our goal is to make this push notification feel like a relief, not a bill. We want them to feel like they are "buying" peace of mind for the rest of the year.
+
+📲 The "January 1st" Push Notification
+
+This should hit their phones at 11:00 AM on January 1st. They’ve finished their New Year’s Eve shifts, they’ve slept in, and now they are thinking about the year ahead.
+
+Headline:
+Tax Year 2026/27: Ready to Close? 📗
+
+Body:
+Great job on your quarterly updates! Your Final Declaration is now ready. For a one-off £29 fee, we’ll consolidate your driving, PAYE, and dividends into your 5th and final HMRC return. Tap to finalize and beat the Jan 31st deadline today!
+
+🛠️ Replit Instruction for the "Final Filing" Unlock
+
+We need to ensure that once they pay the £29, the app actually changes its behavior and gives them that "Certificate of Completion."
+
+"Implement the 5th Return Unlock & Success Flow:
+
+Payment Verification: Check the user's one_time_payment_status for 'FINAL_DECLARATION_2026'.
+
+Submission Logic: Once paid, enable the 'Submit to HMRC' button on the Tax Overview screen.
+
+The Success Event: After a successful HMRC submission:
+
+Trigger a 'Confetti' animation on the screen.
+
+Change the Tax Overview status to 'COMPLETED & FILED'.
+
+Generate a PDF 'Tax Year Certificate' (using a library like PDFKit) that includes the HMRC Submission ID, a breakdown of tax paid, and the MCTUSA 'Shield of Accuracy' seal.
+
+Archive Logic: Move all 2026 receipts and data into the 'Vault Archives' to clear the dashboard for the 2027 tax year."
+
+📈 The "Creative Partner" View: Why the £29 is Genius
+
+Psychologically, by the time January rolls around, the driver has already paid you £215 over the year. The £29 feels like a small "Processing Fee" to get the whole thing off their plate.
+
+It also serves as a massive retention tool:
+If they haven't paid their monthly £17.99 for a few months, they have to catch up and pay the £29 to get their final filing done. It’s the "hook" that ensures they stay current with their bills.

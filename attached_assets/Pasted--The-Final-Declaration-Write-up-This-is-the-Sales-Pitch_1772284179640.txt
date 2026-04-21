@@ -1,0 +1,76 @@
+🏛️ The "Final Declaration" Write-up
+
+This is the "Sales Pitch" inside the app that appears when the user clicks on the 5th Return module.
+
+Header:
+
+The Final Declaration: Seal Your Tax Year 🛡️
+Body:
+Your 4 Quarterly Updates provided HMRC with a "Live Feed" of your driving business. Now, it's time for the Final Declaration—the legal submission that officially replaces your Self-Assessment.
+
+What’s Included for £29:
+
+Income Consolidation: We pull in your PAYE employment, pensions, and dividends.
+
+Allowance Optimization: We automatically apply your £12,570 Personal Allowance and any relevant tax reliefs.
+
+Error Shield: AI-powered cross-check of your 4 quarters to catch any double-entries or missed expenses.
+
+Legal Receipt: An official HMRC submission ID and a "Tax Year Certificate" for your records.
+
+Button:
+[ 🚀 UNLOCK FINAL FILING - £29.00 ]
+
+📊 The "Tax Overview" Screen (2026/27 Edition)
+
+This is the most important screen in the app. It gives the driver a "Live" view of what they owe so they aren't shocked in January.
+
+Screen Title: Tax Year 2026/27 Summary
+
+Income Source	Amount	Status
+🚕 Private Hire (MCTUSA)	£34,500	Synced
+💼 Part-time Job (PAYE)	£8,200	HMRC Live Sync
+📈 Dividends/Savings	£450	Manual Entry
+Total Gross Income	£43,150	
+Tax Breakdown	Amount
+Personal Allowance	-£12,570
+Taxable Income	£30,580
+Estimated Tax (20%)	£6,116
+Tax Already Paid (PAYE)	-£1,640
+Remaining Balance Due	£4,476
+Footer Note:
+Estimated balance based on England/Wales/NI tax bands. This updates in real-time as you scan receipts.
+
+🛠️ Replit Instructions for the "5th Return Logic"
+
+This ensures the app calculates the tax correctly based on the 2026/27 thresholds.
+
+"Build the Year-End Finalization Wizard:
+
+The 5th Return Charge: Create a Stripe 'One-Time Payment' trigger for £29.00. Do not allow the 'Final Declaration' submission until this is paid.
+
+2026/27 Tax Math: Hard-code the UK tax bands:
+
+£0 - £12,570: 0%
+
+£12,571 - £50,270: 20%
+
+£50,271 - £125,140: 40%
+
+The 'Other Income' Pull: Add a function to fetch P60 data via the HMRC 'Individual Income' API.
+
+Live Summary View: Create a 'Tax Overview' dashboard that subtracts 'Tax Paid at Source' (from PAYE) from the 'Total Liability' to show the user their 'Actual Balance Due'."
+
+💰 Your Profit Check
+
+Monthly Revenue: £17.99 x 12 = £215.88
+
+Year-End Bonus: £29.00
+
+Total Per User: £244.88
+
+Cost to you (Server/AI): ~£50.00
+
+Net Profit: ~£194.88 per driver.
+
+With 1,000 drivers, you are looking at nearly £200k in pure profit.

@@ -1,0 +1,103 @@
+{
+  "nav": {
+    "dashboard": "Instrumentbræt",
+    "income": "Indkomst",
+    "expenses": "Udgifter",
+    "mileage": "Kilometerstand",
+    "receipts": "Kvitteringer",
+    "vehicles": "Køretøjer",
+    "export": "Eksport",
+    "auditDefense": "Revisionsforsvar",
+    "settings": "Indstillinger",
+    "dac7": "DAC7-værktøj",
+    "currency": "Valuta",
+    "sync": "Gig-synk",
+    "signOut": "Log ud",
+    "quarterly": "Kvartalsindsendelse",
+    "estimatedTax": "Estimeret skat",
+    "taxOverview": "Skatteöversigt"
+  },
+  "common": {
+    "save": "Gem",
+    "cancel": "Annuller",
+    "delete": "Slet",
+    "edit": "Rediger",
+    "add": "Tilføj",
+    "search": "Søg",
+    "filter": "Filtrer",
+    "loading": "Indlæser...",
+    "noData": "Ingen data fundet",
+    "confirm": "Bekræft",
+    "back": "Tilbage",
+    "next": "Næste",
+    "submit": "Indsend",
+    "upload": "Upload",
+    "download": "Download",
+    "close": "Luk",
+    "yes": "Ja",
+    "no": "Nej",
+    "total": "Total",
+    "date": "Dato",
+    "amount": "Beløb",
+    "category": "Kategori",
+    "description": "Beskrivelse",
+    "actions": "Handlinger",
+    "status": "Status",
+    "language": "Sprog"
+  },
+  "dashboard": {
+    "title": "Instrumentbræt",
+    "welcome": "Velkommen tilbage",
+    "taxSummary": "Skattesammenfatning",
+    "grossIncome": "Bruttoindkomst",
+    "totalExpenses": "Samlede udgifter",
+    "mileageDeduction": "Kilometerfradrag",
+    "netProfit": "Nettooverskud",
+    "selfEmploymentTax": "Selvstændig erhvervsskat",
+    "quarterlyEstimate": "Kvartalsskøn",
+    "quickActions": "Hurtige handlinger",
+    "scanReceipt": "Scan kvittering",
+    "addIncome": "Tilføj indkomst",
+    "addExpense": "Tilføj udgift",
+    "logMileage": "Log kilometer"
+  },
+  "auth": {
+    "login": "Log ind",
+    "logout": "Log ud",
+    "welcome": "Din skattesæson, forenklet"
+  },
+  "region": {
+    "detected": "Det ser ud til, at du er i {{country}}.",
+    "switchPrompt": "Vil du skifte til din lokale region?",
+    "switchRegion": "Skift region",
+    "dismiss": "Afvis",
+    "detecting": "Registrerer din placering...",
+    "permissionDenied": "Placeringsadgang nægtet"
+  },
+  "expenses": {
+    "title": "Udgifter",
+    "addExpense": "Tilføj udgift",
+    "editExpense": "Rediger udgift",
+    "noExpenses": "Ingen udgifter registreret endnu",
+    "merchant": "Sælger",
+    "receipt": "Kvittering",
+    "taxDeductible": "Skattefradragsberettiget",
+    "selectCategory": "Vælg kategori"
+  },
+  "income": {
+    "title": "Indkomst",
+    "addIncome": "Tilføj indkomst",
+    "editIncome": "Rediger indkomst",
+    "noIncome": "Ingen indkomst registreret endnu",
+    "source": "Kilde",
+    "platform": "Platform",
+    "tips": "Drikkepenge"
+  },
+  "ai": {
+    "taxPredictor": {
+      "title": "Smart skatteprediktor",
+      "analyze": "Analyser",
+      "analyzing": "AI analyserer dine finansielle data..."
+    }
+  }
+}

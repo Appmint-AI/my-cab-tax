@@ -1,0 +1,57 @@
+To build the IRS submission items correctly, we need to implement the exact math and logic the IRS uses to calculate "taxable profit" and "estimated tax."
+
+Since it is now 2026, we must use the updated tax figures (such as the 72.5 cents per mile rate) to ensure our users get the maximum legal deduction.
+
+1. The IRS "Self-Employment Tax" Logic
+Self-employment tax isn't just a flat percentage of total income; it applies to 92.35% of the driver's net profit.
+
+The Math for the Replit Agent:
+
+"Add a calculateTax() function to the Submission module. It must follow this logic:
+
+Net Profit: Gross Income (from 1099-K/NEC) minus Total Business Expenses.
+
+Taxable Base: Net Profit × 0.9235.
+
+SE Tax Owed: Taxable Base × 0.153 (15.3%).
+
+Taxable Income Adjustment: Subtract 50% of the SE Tax from the Net Profit before calculating Federal Income Tax."
+
+2. Updated 2026 Mileage Logic
+The IRS just increased the rate. If we use the old 2024/2025 rates, we are literally losing money for our drivers.
+
+Tell the Replit Agent:
+
+"Set the default 2026 Business Mileage Rate to 72.5 cents per mile. Create a 'Mileage Methodology' toggle:
+
+Standard Mileage: Miles × 0.725.
+
+Actual Expenses: Sum of Gas + Repairs + Insurance + Depreciation.
+
+Validation: If 'Standard Mileage' is chosen, the app should hide the 'Gas' and 'Repair' categories from the total deduction to prevent 'double-dipping,' which is a major IRS audit red flag."
+
+3. The "1099-K Gross-Up" Module
+This is the most confusing part for drivers. Uber/Lyft report the Gross Fare (what the rider paid) on the 1099-K, even though the driver never saw the full amount.
+
+Tell the Replit Agent:
+
+"Create a 1099-K Entry Form. It should have three fields:
+
+Gross Amount (Box 1a): This goes straight to Schedule C, Line 1.
+
+Platform Fees (Uber/Lyft Commission): The app must automatically subtract this as an expense (Schedule C, Line 10).
+
+Net Payout: A calculated field to help the driver verify the numbers against their bank statements."
+
+4. Submission Checklist (The "IRS-Ready" Pack)
+When the driver clicks "Export," the app should generate a summary that mirrors the Schedule C form perfectly.
+
+App Category	Schedule C Line	Driver Action
+Gross Fares	Line 1	Input from 1099-K.
+Standard Mileage	Line 9	Automated from Mileage Tracker.
+Commissions/Fees	Line 10	Input from Platform Summaries.
+Supplies	Line 22	Receipts for water, phone mounts, etc.
+Estimated Tax	Form 1040-ES	Our "Quarterly Estimate" calculation.
+Strategic Build Order:
+
+We should build the 1099-K Gross-Up tool first because that is the foundation of their income. Then, we build the Mileage Log (using the 0.725 rate) as their primary deduction.

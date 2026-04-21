@@ -1,0 +1,67 @@
+REPLIT AGENT MASTER PROMPT: MY CAB TAX USA (PHASE 2)
+
+"I am building My Cab Tax USA, a professional bookkeeping app for 1099-K drivers. Execute the following architectural and feature updates. Use shadcn/ui, React, Node.js, and PostgreSQL."
+
+1. Database & Infrastructure (The Vault)
+
+PostgreSQL Update: Add a subscription_tier (default: 'basic') and is_verified (boolean) to the users table. Add an income_entries table with columns for net_payout, gross_income, platform_fees, and source.
+
+GCS Volume Mount: Configure the app to use a Google Cloud Storage volume mount at /mnt/vault.
+
+Pro Tier Logic: Save all receipt images to /mnt/vault/{userId}/{year}/. Set file metadata for a 7-year retention policy.
+
+2. The Identity Gatekeeper (Compliance)
+
+Verification Flow: Create an onboarding screen that gates the dashboard. Users must upload:
+
+Driver’s License (Front/Back)
+
+Proof of Address
+
+Tax Reference (SSN/EIN)
+
+AI Verification: Use the Google Cloud Vision API to extract the name and expiration date from the License. If license_expiry < current_date, flag the account as 'Invalid'.
+
+3. The AI Receipt Scanner (Premium)
+
+Camera Interface: Use react-webcam to build a /scan route.
+
+OCR Pipeline: When a photo is snapped, send it to the backend. Use Cloud Vision API to extract Merchant, Total, and Date.
+
+Auto-Fill: Return this JSON to the frontend to auto-populate the 'New Expense' form.
+
+4. 1099-K "Auto-Grossing" & Tax Logic
+
+Income Logic: In the Income Form, add a 'Pro' toggle: "Auto-calculate Gross (Uber/Lyft)".
+
+Calculation: Gross = Net / 0.75; Fees = Gross - Net.
+
+2026 Mileage: Update the mileage rate to $0.725 per mile.
+
+5. Monetization (Stripe)
+
+Paywall: Create a /api/stripe/webhook to listen for checkout.session.completed.
+
+Tier Upgrade: Upon successful payment, update subscription_tier to 'pro'. Unlock the Camera Scanner and Auto-Grossing features.
+
+6. Legal Shield & Submission (IRS Audit Report)
+
+The Modal: Before a user can export their data, display a mandatory, non-skippable Legal Disclaimer:
+
+"MCTUSA is a bookkeeping tool, not a tax professional or CPA. You are solely responsible for the accuracy of your data. All automated calculations are estimates and must be verified by you before IRS submission. MCTUSA is not liable for errors, audits, or penalties."
+
+PDF Export: Generate a professional IRS Audit Report that includes:
+
+Income Reconciliation (Bank vs. 1099-K).
+
+Contemporaneous Mileage Log.
+
+Gallery of Scanned Receipts from the 7-Year Vault.
+
+Final Deployment Checklist for You:
+
+GCP Service Account: Ensure you've pasted your Google Cloud JSON key into the Replit Secrets as GOOGLE_APPLICATION_CREDENTIALS.
+
+Stripe API Keys: Add your STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET to Replit Secrets.
+
+Domain & SSL: Once Replit provides the deployment URL, go to the Google Cloud Console (Cloud Run > Manage Custom Domains) to map your domain and trigger the auto-SSL for the camera to work.

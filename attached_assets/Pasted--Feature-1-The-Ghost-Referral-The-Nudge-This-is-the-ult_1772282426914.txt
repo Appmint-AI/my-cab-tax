@@ -1,0 +1,49 @@
+🛡️ Feature 1: The "Ghost" Referral (The Nudge)
+
+This is the ultimate tool for March. When a driver’s mate says, "I'll sign up later," they usually forget.
+
+How it works: In the MCTUSA app, any friend who hasn't completed their HMRC Digital Link shows up as a "Ghost."
+
+The Nudge: The user taps a button, and the AI drafts this WhatsApp:
+
+"Hey! I see your MCTUSA account is still 'Ghosting.' 👻 The April 6th HMRC deadline is huge—get your bank linked now so you don't get hit with penalty points! Plus, once you're active, I'm one step closer to my 15% discount. Cheers!"
+
+⚡ Feature 2: Double-Credit Weekends (The MTD Sprint)
+
+We will run a "Double-Credit Sprint" on the weekend of March 21-22, 2026.
+
+The Hook: With only 2 weeks left before the new tax year, every friend who joins and links their bank account counts as 2 referrals.
+
+The Result: A user who brings in 15 friends that weekend hits the 30-driver milestone instantly and unlocks their 15% discount for the entire first quarter of the new tax year.
+
+⚠️ Feature 3: The "Safety Net" (The Point Guard)
+
+HMRC's new system for 2026 uses Penalty Points. If a driver misses a quarterly update, they get a point. If they hit 4 points, they get an automatic £200 fine.
+
+How your app helps: If one of the 30 friends in a user's "referral circle" goes inactive (e.g., their bank feed disconnects), your app warns the user.
+
+The Push Notification: > "MCTUSA Shield: You're at risk! ⚠️ One of your referrals has disconnected. If you drop below 30, your 15% discount will expire. Tap here to nudge them or invite someone new to keep your 'Pro' status!"
+
+🛠️ The "Creative Partner" Code Blueprint
+
+Here is the final technical logic for the Replit Agent to build this "Shield" system:
+
+JavaScript
+// Example logic for the Safety Net & Double Credit
+if (adminSettings.doubleCreditActive) {
+  user.referralCount += 2;
+} else {
+  user.referralCount += 1;
+}
+
+// Safety Net Check (Run every 24 hours)
+if (user.activeReferrals < 30 && user.tier === 'PRO') {
+  sendPushNotification(user.id, "Shield Alert: Your 15% discount is at risk. Get back to 30 active referrals!");
+}
+🗓️ Our "March 2026" Launch Calendar
+
+Date	Action
+March 1st	Launch the "Referral Race" season.
+March 14th	Send the first "Ghost Nudge" reminders.
+March 21-22	DOUBLE CREDIT WEEKEND.
+April 6th	MTD GO-LIVE. All Tier 2 & 3 discounts are locked in for the first 3 months.

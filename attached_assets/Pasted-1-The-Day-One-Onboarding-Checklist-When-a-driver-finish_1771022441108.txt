@@ -1,0 +1,56 @@
+1. The "Day-One" Onboarding Checklist
+
+When a driver finishes their ID verification, the very next screen must be the Vehicle Profile & Odometer Setup.
+
+Tell the Replit Agent:
+
+"Create an OnboardingMileage step. Before the driver can log their first trip, they must:
+
+Add Vehicle: Input Year, Make, and Model.
+
+Initial Odometer Reading: Input the current mileage on their car's dashboard.
+
+Photo Verification: Use the camera to take a photo of the dashboard's odometer.
+
+Storage: Store this photo in the mycabtax-usa-vault with the tag odometer_start_2026. This serves as the legal anchor for all future miles."
+
+2. The 3 Types of Deductible Miles (The "Hidden" Tax Savings)
+
+Many drivers only track miles while a passenger is in the car. You should educate them during onboarding to track all three types to maximize their refund.
+
+Trip Type	Description	Deductible?
+Phase 1: Online	Driving while the app is on, waiting for a ping.	YES
+Phase 2: En Route	Driving to pick up a passenger after accepting.	YES
+Phase 3: On Trip	Driving with the passenger in the car.	YES
+Commuting	Driving from home to the first "Online" spot.	NO
+3. The "Midnight Reset" Validation
+
+To keep the logs "Audit-Proof" for 2026, the app should prompt the user to verify their ending odometer at the end of the year (or quarterly).
+
+Tell the Replit Agent:
+
+"Add a QuarterlyCheckIn notification.
+
+Every 3 months, prompt the user to take a new photo of their odometer.
+
+Compare the app's GPS-tracked miles against the physical odometer change.
+
+If there is a discrepancy (e.g., the driver used the car for a personal road trip), ask them to 'Classify Gap as Personal' so the business-to-personal ratio is 100% accurate for the IRS."
+
+🏁 Final Project Status: 100% Ready
+
+You have now covered every base for a premium, USA-compliant tax app:
+
+Identity Gatekeeper (Security)
+
+AI Receipt Scanner (Automation)
+
+7-Year Vault (Compliance)
+
+Auto-Grossing & 1099-K Match (Logic)
+
+$50 Direct Filing (Revenue)
+
+Audit Defense Guarantee (Trust)
+
+Mileage Odometer Anchor (Audit-Proofing)

@@ -1,0 +1,63 @@
+🏛️ MCTUSA: The Global "Head Office" Blueprint
+1. Core Architecture
+
+Hosting: Google Cloud Platform (GCP).
+
+Database: PostgreSQL (for financial transactions) + Google Cloud Storage (for the 7-Year Vault).
+
+AI Engine: Google Document AI (for OCR receipt processing) + Vertex AI (for tax categorization).
+
+Payments: Stripe (Global Engine) with USD-pegged dynamic pricing.
+
+2. The UK Compliance Engine (MTD 2026)
+
+The 4+1 Filing System: * 4 x Quarterly Updates (Included in £17.99/mo).
+
+1 x Final Declaration (£29.00 one-off fee).
+
+Universal Credit Sync: Real-time earnings reporting module for DWP compliance.
+
+Mixed Income Module: Integration for PAYE, Pensions, and Dividends via HMRC API.
+
+Penalty Shield: Point-tracking system to warn users before they hit the HMRC 4-point fine threshold.
+
+3. The USA Compliance Engine (IRS/1099)
+
+Quarterly Estimated Tax (1040-ES): Automated calculation for April, June, Sept, and Jan deadlines.
+
+Schedule C Generator: Real-time categorization of "Actual Expenses" vs. "Standard Mileage Rate."
+
+Self-Employment Tax Shield: Automated 15.3% set-aside calculation to avoid end-of-year debt.
+
+4. The "Profit & Growth" Logic (The Secret Sauce)
+
+Referral Tiers: 10% (Starter), 15% (30 active), 20% (50 active) discounts—valid for 3 months.
+
+VIP Slots: Exactly 20 slots for Family/Influencers.
+
+Family: Base Cost + 5% (Margin Protected).
+
+VIP: 40% Discount (High Profit).
+
+Ghost Nudges: One-tap WhatsApp "Nudge" for pending referrals.
+
+Double-Credit Weekends: Admin-controlled toggle for 2x growth spikes.
+
+The Safety Net: Push notification alert if a user is about to lose their discount tier.
+
+5. Global Pricing & Inflation Guard
+
+USD Peg: All prices are calculated in USD and converted to local currency at the monthly exchange rate.
+
+The Floor Price: No subscription can ever fall below $5.00/mo, ensuring server and AI costs are always covered.
+
+Inflation Alert: Admin notification if a local currency devalues by >10% in 30 days.
+
+🚀 30-Day Go-Live Roadmap (Starting March 1, 2026)
+
+Week	Phase	Key Action
+Week 1	Infrastructure	Deploy to GCP & apply for Startup Credits ($200k target).
+Week 2	FinTech Setup	Connect Stripe API and hard-code the £29 Final Return fee.
+Week 3	Soft Launch	Grant the 20 VIP Slots to "Alpha" testers and influencers.
+Week 4	Growth Spike	Run Double Credit Weekend (March 21-22).
+Week 5	The MTD Push	Activate Ghost Nudges for April 6th HMRC Deadline.

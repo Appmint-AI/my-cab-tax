@@ -1,0 +1,43 @@
+"We are now ready to finalize the Full Global Footprint and high-end features. Please implement the following in one continuous build:
+
+1. Expanded Global Tax Engine (2026 Rules)
+
+Update the Global Tax Centre and Tax Engines to include full support (Currency, VAT/GST, and 2026 Tax Brackets) for these specific regions:
+
+Scandinavia: Add Norway (NOK), Sweden (SEK), and Denmark (DKK) with 25% VAT logic and local income tax brackets.
+
+European Union (Unified): Set Euro (€) as the standard for all other EU countries. Integrate a DAC7 Compliance Tracker that flags users when they reach the €2,000 or 30-transaction reporting threshold.
+
+East Asia: * Malaysia (MYR): Implement the 2026 Gig Workers Act logic (SOCSO deductions, RM10,000 threshold for tax relief).
+
+China (CNY): Add the 2026 New VAT Law (3% simplified rate for transport/delivery).
+
+Indonesia (IDR): Include the Economic Stimulus 2026 logic (Income Tax Article 21 exemption for earnings up to IDR 10m/month).
+
+South America & Africa: Add Brazil (BRL), South Africa (ZAR), and Nigeria (NGN) with their respective 2026 digital withholding and turnover tax rules.
+
+2. Multilingual & Regional UI
+
+Enable i18next support for: Norwegian, Swedish, Danish, Spanish, Portuguese, Chinese (Mandarin), Malay, and Indonesian.
+
+The RegionDetector must automatically toggle the Currency and AI Assistant language based on the user's IP or manual selection.
+
+3. AI Feature Activation (Gemini 3 Flash)
+
+Ensure the following are fully functional and visible on the dashboard:
+
+Intelligent OCR: A 'Scan Receipt' button that extracts Date, Total, Vendor, and Tax, then auto-categorizes the expense based on the user's country laws.
+
+Statement Parser: A 'Upload Statement' area for PDF/CSV earnings from Uber/Grab/DoorDash.
+
+Voice Bookkeeping: A floating microphone button for natural language entries (e.g., 'I spent 500 Krone on tires today').
+
+Smart Tax Predictor: The Gemini-powered chatbot that gives personalized year-end tax forecasts in the user’s local language.
+
+4. Mobile-First Polish
+
+Ensure all 'Quick-Action' tiles (Scan, Add Income, Log Miles) are sized for thumb-use on mobile screens.
+
+Confirm the PWA (Progressive Web App) settings are active so users can 'Add to Home Screen' and receive Web Push Notifications for tax deadlines.
+
+Please perform these updates now and restart the server once finished to verify the new regional logic."

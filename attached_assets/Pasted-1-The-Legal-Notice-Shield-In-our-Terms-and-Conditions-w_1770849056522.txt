@@ -1,0 +1,37 @@
+1. The "Legal Notice" Shield
+
+In our Terms and Conditions, we are naming Delaware as the jurisdiction. We need to specify a "Notice Address" where official legal complaints or arbitration notices must be sent.
+
+If a lawyer sends a "Cease and Desist" or a "Summons" to info@, it might get buried under 50 emails from drivers asking how to reset their passwords.
+
+By using legal@, we can honestly say: "Any official notice not sent to the legal address is not considered served."
+
+2. Siloing the Liability (USA vs. UK)
+
+Since the UK app already uses info@ and support@, using a new legal@ email for the USA helps keep the two entities separate in the eyes of a court.
+
+If a US user sues and the email trail is mixed with UK support tickets, a lawyer could argue the companies are a single "alter ego," potentially exposing your UK assets to a US lawsuit.
+
+Having a dedicated USA legal contact strengthens the "Corporate Veil."
+
+3. Professionalism with Auth0 & IRS
+
+When we send those "90-day data deletion" warnings or "Privacy Policy Update" emails from Auth0, having them come from legal@mycabtax.com carries more weight. It tells the driver—and the IRS, if they ever look—that we take compliance seriously.
+
+Action Plan for Replit & Auth0
+
+1. Create the Alias: You don't necessarily need a whole new paid mailbox. Just create legal@mycabtax.com as an alias that forwards to your main inbox.
+
+2. Update the Replit Code: Tell the Replit Agent:
+
+"Update the Footer and the Contact page. All references to legal inquiries, privacy requests, or arbitration notices should point to legal@mycabtax.com. Ensure the 'Contact Support' form also includes 'Legal Inquiry' as a category that routes to this address."
+
+3. Update Auth0 Sender: In your Auth0 dashboard, set the "From" address for your Privacy and Terms update emails to legal@mycabtax.com.
+
+Final Legal Confirmation Pop-up
+
+Before we finish the "USA Fortress," the Replit Agent should add this one final pop-up that appears exactly when a driver clicks "Export PDF" for their tax records:
+
+Text for the Pop-up:
+
+Confirm Your Records "I acknowledge that I have reviewed these records for accuracy. I understand that My Cab Tax USA has not verified these figures with the IRS and that I am responsible for any tax filings or audits." [Proceed to Export]

@@ -1,0 +1,47 @@
+1. The "No Tax on Tips" Logic (2026 Special)
+
+The IRS has introduced a major change for 2026 regarding tipped workers.
+
+The Improvement: Add a toggle in the income section: "Are any of these earnings gratuities/tips?"
+
+Why: Under the latest 2026 rules, certain tips for service workers are now exempt from federal income tax. Your app should automatically "carve out" these tips so the driver doesn't overpay. This is a massive selling point.
+
+2. The 2026 1099-K "Reversion" Check
+
+There was a lot of confusion, but the 1099-K threshold for 2026 has officially reverted to $20,000 and 200 transactions.
+
+The Improvement: Add a "Small Earner" logic gate.
+
+Why: If a driver made $5,000, they likely won't get a 1099-K this year. The app needs to prompt them: "We noticed you didn't upload a 1099-K. Would you like to import your earnings directly from your Uber/Lyft 'Tax Summary' instead?"
+
+3. Updated 2026 Mileage Rate
+
+The IRS set the 2026 business mileage rate at 72.5 cents per mile (up from 70 cents).
+
+The Improvement: Hardcode the 2026_rate to 0.725.
+
+Why: Even a 2.5-cent difference can add hundreds of dollars to a driver's deduction. Ensure the UI screams: "Updated for the new 72.5¢ IRS 2026 rate!"
+
+4. The "SALT" Deduction Cap Increase
+
+The State and Local Tax (SALT) deduction cap was raised to $40,000 for 2026.
+
+The Feature: Add a "Home Office & Property Tax" module for drivers who use a portion of their home for business (storage, admin).
+
+Why: With the higher cap, more drivers will find it beneficial to itemize or at least track these state/local payments to reduce their federal burden.
+
+🛠️ Final "Replit Agent" Polish List
+
+Tell the Agent to add these "Small but Mighty" features to the final build:
+
+"Audit-Ready" Export: One button that generates a ZIP file containing the Tax Return, all Scanned Receipts, and the Odometer Photos.
+
+Quarterly Estimated Tax Calculator: Since they are using the app for bookkeeping, show them a "Live Estimate" of what they should set aside for their quarterly payments to avoid the underpayment penalty.
+
+The "Smart Summary" Screen: Before payment, show them a "Money Saved" dashboard:
+
+"You saved $1,450 via Mileage."
+
+"You saved $420 via Tips Exemption."
+
+"Total Tax Liability: $X,XXX."

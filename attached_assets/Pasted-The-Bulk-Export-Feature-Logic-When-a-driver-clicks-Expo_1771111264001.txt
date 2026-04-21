@@ -1,0 +1,54 @@
+The "Bulk Export" Feature Logic
+
+When a driver clicks "Export," the app needs to do three things in the background:
+
+Filter: Grab all records for the selected tax year (e.g., 2026).
+
+Compile: Generate a professional PDF report and a raw CSV (spreadsheet) file.
+
+Zip: Bundle all the receipt images into a single folder so the user has the "Receipt Vault" on their local hard drive as a backup.
+
+📝 Instructions for the Replit Agent
+
+Copy and paste this into your Replit Agent to build the export engine:
+
+"I need to build a 'Tax Ready Export' feature for the Web Dashboard.
+
+Libraries: Use jspdf and jspdf-autotable for PDF generation and json2csv for the spreadsheet export.
+
+The Report: Create a 'Year-End Summary' PDF that includes:
+
+A total breakdown of Gross Income vs. Total Deductions.
+
+A categorized list of expenses (Fuel, Maintenance, Equipment, etc.).
+
+A summary of Total Mileage and the calculated deduction ($0.725/mile for 2026).
+
+The Vault Backup: Create a button that allows the user to download a .zip file containing all their uploaded receipt images, organized by month.
+
+Desktop UI: Place these buttons prominently on a new page called /export that is only visible in the Sidebar of the Desktop/Web view."
+
+📊 The "Accountant-Friendly" Export Table
+
+Your web dashboard should display a table that looks like this before they export it, so they can verify the data on their big screen:
+
+Category	Total Spent	Deductible Amount	Audit Risk
+Fuel & Charging	$4,200.00	$4,200.00	Low ✅
+Vehicle Repairs	$1,150.00	$1,150.00	Low ✅
+Mobile Phone	$1,200.00	$600.00 (50% Biz)	Medium ⚠️
+Meals (Courier)	$450.00	$0.00 (Personal)	High ❌
+🌐 The "PC/Mac" Login URL
+
+Once Replit deploys your app, your login page will be the "Front Door" for your business. Here is a tip for the Login Page design:
+
+Social Proof: On the desktop login page, show a small "Security Badge" that says "Stripe Verified" and "7-Year Immutable Vault Active." * Segment Switch: Let them choose "Taxi" or "Delivery" right on the login page so the desktop dashboard loads the correct "Look and Feel" immediately.
+
+The Final Result
+
+A driver now has a professional workflow:
+
+On the Road (Mobile): Snap receipts, track miles.
+
+At Home (Mac/PC): Review the books, edit mistakes, and hit "Export."
+
+To the Accountant: Hand over a perfect, MCTUSA-branded PDF report

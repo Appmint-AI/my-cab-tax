@@ -1,0 +1,53 @@
+You said
+when you reviewed the 'My Cab Tax UK' app, are there any features that would be great on the USA version of the app?
+Gemini said
+In reviewing the My Cab Tax UK app, there are several "high-utility" features that we should definitely migrate to the USA version. While the tax codes differ, the workflow of a driver is universal.
+
+Here are the top UK features to adapt for the My Cab Tax USA build on Replit/Cloud Run:
+
+1. The "Rolling Tax" Estimated Liability
+
+The UK version has a "Real-Time Tax" figure. In the USA, self-employed drivers often get hit with a surprise 15.3% Self-Employment tax plus Income Tax.
+
+The Feature: A dashboard widget that calculates your Estimated Quarterly Tax Payment.
+
+USA Adaptation: Calculate (NetIncome×15.3%) plus a simplified estimate for Federal Income Tax. This helps drivers avoid the IRS "Underpayment Penalty."
+
+2. Automated "Platform Fee" Reconciliation
+
+UK apps often handle Uber/Bolt "Commission" deductions automatically. In the USA, a common mistake is only reporting the "payout" rather than the "gross fare."
+
+The Feature: A 1099-K / 1099-NEC "Gross-Up" tool.
+
+USA Adaptation: A feature where drivers can enter their weekly Uber/Lyft summary, and the app automatically splits it into Gross Income (Line 1 of Schedule C) and Commissions/Fees (Line 10).
+
+3. Biometric "Quick-Log"
+
+The UK app allows FaceID/Fingerprint login for fast entry between fares.
+
+The Feature: Auth0-supported Biometric Login.
+
+USA Adaptation: Since we are using Auth0, enable Biometrics so a driver can log a $5 car wash or a $60 gas fill-up in 10 seconds while at the pump, without typing a long password.
+
+4. "Audit-Safe" Receipt Scanner
+
+UK drivers use this to comply with "Making Tax Digital" (MTD). In the USA, the IRS requires receipts for any expense over $75 (but it's best practice to have them for everything).
+
+The Feature: Camera-to-Cloud Receipt Storage.
+
+USA Adaptation: When a user takes a photo, the app should automatically extract the Date, Amount, and Vendor using OCR, then store the image in the Google Cloud "Tax Vault."
+
+5. Multi-Car Management
+
+Many UK taxi firms manage small fleets. In the USA, many drivers switch between a "gas saver" for weekdays and a "premium vehicle" for weekends.
+
+The Feature: Multi-Vehicle Logbooks.
+
+USA Adaptation: Allow the driver to create "Vehicle Profiles." The IRS requires separate records for each vehicle if you use the "Actual Expenses" method for one and "Standard Mileage" for the other.
+
+Comparison: Feature Mapping (UK vs. USA)
+
+UK Feature (HMRC)	USA Version (IRS)	Why it’s better
+MTD Quarterly Filing	Estimated Tax Calculator	Prevents IRS underpayment penalties.
+VAT Tracker	Sales Tax/Local Fee Tracker	Tracks local airport fees or city-specific surcharges.
+P60/P45 Integration	1099-K / 1099-NEC Import	Matches the documents the IRS already has.

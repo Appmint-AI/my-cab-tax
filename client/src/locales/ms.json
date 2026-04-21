@@ -1,0 +1,104 @@
+{
+  "nav": {
+    "dashboard": "Papan Pemuka",
+    "income": "Pendapatan",
+    "expenses": "Perbelanjaan",
+    "mileage": "Jarak",
+    "receipts": "Resit",
+    "vehicles": "Kenderaan",
+    "export": "Eksport",
+    "auditDefense": "Pertahanan Audit",
+    "settings": "Tetapan",
+    "dac7": "Alat DAC7",
+    "currency": "Mata Wang",
+    "sync": "Segerak Gig",
+    "signOut": "Log Keluar",
+    "quarterly": "Pemfailan Suku Tahun",
+    "estimatedTax": "Cukai Anggaran",
+    "taxOverview": "Gambaran Keseluruhan Cukai"
+  },
+  "common": {
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Padam",
+    "edit": "Sunting",
+    "add": "Tambah",
+    "search": "Cari",
+    "filter": "Tapis",
+    "loading": "Memuatkan...",
+    "noData": "Tiada data ditemui",
+    "confirm": "Sahkan",
+    "back": "Kembali",
+    "next": "Seterusnya",
+    "submit": "Hantar",
+    "upload": "Muat Naik",
+    "download": "Muat Turun",
+    "close": "Tutup",
+    "yes": "Ya",
+    "no": "Tidak",
+    "total": "Jumlah",
+    "date": "Tarikh",
+    "amount": "Jumlah",
+    "category": "Kategori",
+    "description": "Penerangan",
+    "actions": "Tindakan",
+    "status": "Status",
+    "language": "Bahasa"
+  },
+  "dashboard": {
+    "title": "Papan Pemuka",
+    "welcome": "Selamat kembali",
+    "taxSummary": "Ringkasan Cukai",
+    "grossIncome": "Pendapatan Kasar",
+    "totalExpenses": "Jumlah Perbelanjaan",
+    "mileageDeduction": "Potongan Jarak",
+    "netProfit": "Keuntungan Bersih",
+    "selfEmploymentTax": "Cukai Pekerjaan Sendiri",
+    "quarterlyEstimate": "Anggaran Suku Tahun",
+    "quickActions": "Tindakan Pantas",
+    "addIncome": "Tambah Pendapatan",
+    "addExpense": "Tambah Perbelanjaan",
+    "logMileage": "Log Jarak",
+    "scanReceipt": "Imbas Resit",
+    "moneySaved": "Wang Jimat"
+  },
+  "auth": {
+    "login": "Log Masuk",
+    "logout": "Log Keluar",
+    "welcome": "Musim cukai anda, dipermudahkan"
+  },
+  "region": {
+    "detected": "Nampaknya anda berada di {{country}}.",
+    "switchPrompt": "Adakah anda mahu beralih ke rantau tempatan anda?",
+    "switchRegion": "Tukar Rantau",
+    "dismiss": "Abaikan",
+    "detecting": "Mengesan lokasi anda...",
+    "permissionDenied": "Akses lokasi ditolak"
+  },
+  "expenses": {
+    "title": "Perbelanjaan",
+    "addExpense": "Tambah Perbelanjaan",
+    "editExpense": "Sunting Perbelanjaan",
+    "noExpenses": "Tiada perbelanjaan direkodkan lagi",
+    "merchant": "Peniaga",
+    "receipt": "Resit",
+    "taxDeductible": "Potongan Cukai",
+    "selectCategory": "Pilih kategori"
+  },
+  "income": {
+    "title": "Pendapatan",
+    "addIncome": "Tambah Pendapatan",
+    "editIncome": "Sunting Pendapatan",
+    "noIncome": "Tiada pendapatan direkodkan lagi",
+    "source": "Sumber",
+    "platform": "Platform",
+    "tips": "Tip"
+  },
+  "ai": {
+    "taxPredictor": {
+      "title": "Peramal Cukai Pintar",
+      "analyze": "Analisis",
+      "analyzing": "AI sedang menganalisis data kewangan anda..."
+    }
+  }
+}

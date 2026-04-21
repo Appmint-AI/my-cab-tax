@@ -1,0 +1,64 @@
+1. The Database "Infrastructure" (SQL Schema)
+
+We need to track the user's status and the "Soft Delete" window we discussed.
+
+Tell the Replit Agent:
+
+"Update the PostgreSQL schema. Add the following columns to the users table:
+
+subscription_tier: TEXT (Default: 'basic') — to track 'basic' vs 'pro'.
+
+stripe_customer_id: TEXT — to link to their billing.
+
+deleted_at: TIMESTAMP — for our 30-day soft-delete buffer.
+
+vault_enabled: BOOLEAN (Default: false) — for the 7-year storage feature.
+
+Create a new table income_entries:
+
+id, user_id, source (e.g., Uber), net_payout, gross_income, platform_fees, is_auto_grossed (boolean), created_at (timestamp)."
+
+2. The "Auto-Grossing" Logic (Premium Feature)
+
+This is the math that "reconstructs" the 1099-K. We use a 25% default platform fee (common for Uber/Lyft) but mark it as an estimate.
+
+The Math for the Replit Agent:
+
+"Implement the calculateGrossUp function in the backend:
+
+JavaScript
+function calculateGrossUp(netPayout) {
+  const feeRate = 0.25; // 25% Platform Fee estimate
+  const grossIncome = netPayout / (1 - feeRate);
+  const platformFees = grossIncome - netPayout;
+  return { grossIncome, platformFees };
+}
+In the UI, if user.subscription_tier !== 'pro', blur the 'Auto-Gross' toggle and show a 'Locked' icon with an 'Upgrade' tooltip."
+
+3. The Stripe Webhook (The Paywall)
+
+This is the bridge that turns a payment into "Pro" access.
+
+Tell the Replit Agent:
+
+"Create a /api/webhooks/stripe route using express.raw() middleware. It must listen for the checkout.session.completed event.
+
+Verify the Stripe signature using process.env.STRIPE_WEBHOOK_SECRET.
+
+On success, find the user in our database using the client_reference_id (their Auth0 ID) passed in the session.
+
+Update their subscription_tier to 'pro' and set vault_enabled to true."
+
+Visualizing the Paywall Flow
+
+To ensure the user understands why they are paying, we use a "Locked Feature" UI pattern.
+
+Your Final Construction Checklist
+
+Income Form: Now has a toggle: "Auto-calculate Gross (Pro)."
+
+Dashboard: Shows "Estimated 1099-K Box 1a" based on the Gross-up math.
+
+Settings: Displays "Subscription: Pro" once the Stripe webhook triggers.
+
+Safety: The deleted_at column is ready for the 30-day countdown script.

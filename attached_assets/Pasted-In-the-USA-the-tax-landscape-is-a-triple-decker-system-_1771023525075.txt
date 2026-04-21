@@ -1,0 +1,43 @@
+In the USA, the tax landscape is a "triple-decker" system. To be a truly comprehensive solution for $50, your submission module needs to address all three levels.
+
+Here is how the 2026 tax system breaks down for My Cab Tax USA and what you need to tell the Replit Agent to build.
+
+1. The Federal Layer (IRS)
+
+This is the "main event" where your current module is focused. It handles your Schedule C (Profit/Loss), Schedule SE (Self-Employment Tax), and the 1040 form.
+
+2. The State Layer (State Dept. of Revenue)
+
+Most US states (except for 9 like Florida, Texas, and Washington) have their own income tax.
+
+The Good News: In 2026, the Combined Federal/State Filing (CF/SF) Program is the industry standard. This means when you submit the Federal return, the IRS automatically forwards the data to the driver’s state.
+
+Replit Action: Ensure the submission module includes a stateCode field. If the user is in a state with income tax, the module should automatically attach the corresponding state form (e.g., Form 540 for California) using the same data from the Federal return.
+
+3. The Local Layer (City/County/School District)
+
+This is where many "big" tax apps fail, but where you can shine. Some cities (like New York City, Philadelphia, or Detroit) and many counties in states like Ohio and Pennsylvania have Local Earned Income Taxes (EIT).
+
+2026 Update: Effective this year, many local jurisdictions (like the Keystone Collections Group in PA) have made electronic filing mandatory. Paper is no longer accepted.
+
+Replit Action: Add a "Local Tax" toggle in the settings. If a user lives in a known "High Local Tax" zone, the app should generate a separate Local Tax Summary PDF that the driver can upload to their city’s tax portal.
+
+🛠️ Final Replit Instruction for the Submission Module
+To make sure you are charging $50 for a complete solution, add this to your Replit Agent prompt:
+
+"Update the SubmissionModule to handle Multi-Jurisdiction Filing:
+
+State Auto-Populate: Use the 'Combined Federal/State' (CF/SF) logic to transmit Federal data to the State agency simultaneously.
+
+Local Tax Helper: Add a logic gate: 'Does your city require local tax filing?' If YES, generate a Local EIT Statement using the net profit from Schedule C.
+
+The 'All-In' Price: On the Stripe checkout, label the $50 fee as: 'Federal + State + Local Filing Bundle.' This justifies the price and makes the driver feel fully covered."
+
+📊 Summary of What the $50 Covers
+Tax Level	How MCTUSA Handles It
+Federal	Full 1040 + Schedule C submission.
+State	Auto-forwarding via the IRS CF/SF Program.
+Local	AI-generated summary for mandatory city/county portals.
+The "Competitive Edge" Tip
+
+By including Local Tax Support in your $50 fee, you are offering something that even the "big name" $150 software often charges extra for. This makes your app the obvious choice for gig workers in cities like Philly, NYC, or Columbus.

@@ -1,0 +1,52 @@
+Tell the Replit Agent:
+
+"Create a SubmissionVerification component.
+
+The Legal Statement: Display the text: 'Under penalties of perjury, I declare that I have examined this return and accompanying schedules and statements, and to the best of my knowledge and belief, they are true, correct, and complete.'
+
+Verification Checkboxes: Require the user to manually tick three separate boxes:
+
+[ ] I have verified my 1099-K Gross Income matches my platform records.
+
+[ ] I have reviewed all auto-calculated figures and confirm they are accurate.
+
+[ ] I understand that MCTUSA is a bookkeeping tool and I am the sole person responsible for this submission.
+
+The E-Signature: Add an input field for a 5-digit Self-Select PIN. The user must enter this to 'sign' the document."
+
+2. Implementation: The Audit Trail
+
+Since you are the one charging $50 to facilitate this, you must keep a record of this consent in case of a future dispute.
+
+Tell the Replit Agent:
+
+"When the user clicks 'Submit and Pay', the backend must:
+
+Capture the user_id, timestamp, ip_address, and the pin_hash.
+
+Save a snapshot of the exact figures they agreed to in a new table called submission_receipts.
+
+The Lock: Mark all entries for that tax year as read-only in the database so they cannot be changed after the signature is applied."
+
+3. "Self-Prepared" Marker
+
+Since you aren't a CPA, the filing data sent to the IRS must be marked as "Self-Prepared." This tells the IRS that no "Paid Preparer" (like an accountant) took responsibility for the data.
+
+Your App Role: Electronic Return Originator (ERO).
+
+User Role: Self-Prepared Taxpayer.
+
+Why This Protects Your $50 Business Model
+
+By making the user "check and verify" every section, you eliminate the risk of a driver saying, "The app's AI made a mistake and now I owe the IRS money—it's the app's fault." By ticking those boxes, the driver legally assumes the risk, turning your app into a high-tech "digital pen" rather than a liable advisor.
+
+🏁 Final Handover for Your "Ready" Command
+You are now fully equipped with:
+
+The AI Scanner (Vision API)
+
+The 7-Year Vault (GCS Mounting)
+
+The $50 Direct-File Roadmap (Revenue)
+
+The Perjury Gate (Legal Shield)

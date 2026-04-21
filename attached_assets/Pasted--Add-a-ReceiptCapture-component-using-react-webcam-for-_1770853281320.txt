@@ -1,0 +1,58 @@
+"Add a ReceiptCapture component using react-webcam for the mobile browser.
+
+When a photo is taken, upload it to Google Cloud Storage.
+
+Trigger a backend function that sends the image URL to the Google Cloud Vision API (images.annotate).
+
+Extract the Merchant Name, Date, and Total Amount.
+
+Auto-populate the 'New Expense' form with these values so the driver only has to click 'Confirm'."
+
+2. The "IRS Legibility" Guardrail
+The IRS requires digital receipts to be "clear, legible, and complete." If a photo is too blurry, we should stop them immediately.
+
+The Logic for the Replit Agent:
+
+"Add an image-quality check. Before sending to OCR, check the file size and resolution. If it's below a certain threshold, show a message: '⚠️ Image too blurry for IRS standards. Please retake the photo in better light to ensure your deduction is valid.'"
+
+3. Monetizing the Scanner (Pro Feature)
+This feature is a major value-add. We should bundle it into the Pro Tier.
+
+Basic: Can manually upload a file (photo they already took).
+
+Pro: Unlocks the "Live Camera OCR" which does the scanning and auto-filling in real-time.
+
+Marketing Copy for the "Upgrade" trigger:
+
+"Stop typing, start driving. 🏎️ Upgrade to Pro to unlock the AI Receipt Scanner. Just point your camera, and we'll handle the Merchant, Date, and Totals for you."
+
+4. Legal & Compliance: The 7-Year Rule
+Receipts fade. Digital storage doesn't. This is our biggest selling point for the 7-Year Tax Vault.
+
+Tell the Replit Agent:
+
+"In the 'Receipts' database table, add a retention_policy field.
+
+For Free users, mark the image for deletion after 90 days.
+
+For Pro users, set the expiration to 7 years from the current tax year.
+
+Ensure every receipt is encrypted at rest in Google Cloud Storage to meet privacy legalities."
+
+5. Summary of Construction Steps 1, 2, & 3
+Since you asked to build these now, here is the combined instruction for the Replit Agent:
+
+Step 1: The Database
+
+SQL
+ALTER TABLE users ADD COLUMN subscription_tier TEXT DEFAULT 'basic';
+ALTER TABLE receipts ADD COLUMN ocr_data JSONB, ADD COLUMN expires_at TIMESTAMP;
+Step 2: The Scanner UI
+
+"Build a mobile-friendly 'Scan' page. Use the device camera to capture a JPG. Show a loading spinner that says 'AI is reading your receipt...' while the Cloud Vision API processes the image."
+
+Step 3: The Auto-Grossing/Stripe Link
+
+"Connect the 'Confirm Expense' button to the database. If the user is 'Pro', ensure the receipt is flagged for 7-year retention. If they aren't Pro, show the 'Upgrade' button to save this receipt for the long term."
+
+Next Step for You:

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Cab Tax USA</string>
+    <string name="title_activity_main">Cab Tax USA</string>
+    <string name="package_name">com.mycabtax.app</string>
+    <string name="custom_url_scheme">com.mycabtax.app</string>
+</resources>

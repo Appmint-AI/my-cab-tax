@@ -1,0 +1,53 @@
+1. 2026 Mileage Logic (The Updated Rate)
+The IRS has officially set the business mileage rate for 2026 at 72.5 cents per mile. This is a 2.5-cent increase over 2025.
+
+Tell the Replit Agent:
+
+"Update the mileage calculation logic. The global constant for BUSINESS_MILEAGE_RATE_2026 must be set to 0.725. In the Submission module, ensure that when a user generates their Schedule C report, the app multiplies the total 'Business Miles' by this rate."
+
+2. The "1099-K Gross-Up" UI Build
+This is where we build the form for the 1099-K. Remember: the IRS expects to see the Gross amount on Line 1, while the fees are deducted separately on Line 10.
+
+Tell the Replit Agent:
+
+"Build a '1099-K Entry Form' using shadcn components.
+
+Field 1: 'Gross Amount of Payment' (Box 1a on the 1099-K). Map this to Schedule C, Line 1.
+
+Field 2: 'Platform Fees/Commissions'. Map this to Schedule C, Line 10.
+
+Logic: Create a calculated 'Estimated Net' field that shows (Gross - Fees) so the driver can cross-reference it with their actual bank deposits."
+
+3. The "Self-Employment Tax" Estimator
+This is the "killer feature" that tells the driver exactly how much to set aside for their quarterly payments.
+
+The Math for the Replit Agent:
+
+"Create a getTaxEstimate() helper function.
+
+Calculate Net Profit (Total Income - Total Expenses).
+
+Calculate Taxable Self-Employment Income: Net Profit * 0.9235.
+
+Calculate Self-Employment Tax: Taxable SE Income * 0.153.
+
+Display this on the dashboard as 'Reserved for Taxes' to help drivers avoid a surprise bill."
+
+4. The "IRS Submission Pack" (The ZIP Export)
+When the user clicks "Export for IRS," we want them to have a "Fortress of Evidence."
+
+Tell the Replit Agent:
+
+"The 'Export for IRS' button should trigger a background job to generate a ZIP file containing:
+
+Summary.pdf: A one-page 'Schedule C Mockup' showing totals for Income, Mileage ($0.725 rate), and categorized Expenses.
+
+MileageLog.csv: A detailed log of every trip (Date, Start/End, Purpose, Miles).
+
+Receipts/: A folder containing all receipt images uploaded during the year."
+
+USA-Only Check: The 1099-K Threshold
+
+For the 2026 tax year, the IRS is enforcing a lower threshold for 1099-K reporting (planned at $600). This means almost every driver will get one. We should add a help tip to the UI:
+
+💡 'IRS Update: You will likely receive a 1099-K if you earned over $600 this year. Make sure to report the GROSS amount from Box 1a here, even if it’s more than what you received in your bank account.'

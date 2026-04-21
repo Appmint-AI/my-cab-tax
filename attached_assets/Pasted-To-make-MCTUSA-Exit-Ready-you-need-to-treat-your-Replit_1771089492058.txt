@@ -1,0 +1,74 @@
+To make MCTUSA "Exit-Ready," you need to treat your Replit Agent like a senior engineer writing a legacy for their successor.
+
+1. The "Architectural Blueprint" (The PLAN.md)
+
+Acquirers look for a clear design philosophy. If they can't find a map of how the data flows, they assume it’s a mess.
+
+Tell the Replit Agent:
+
+"Create a PLAN.md file in the root directory. This file must explain:
+
+The Core Tech Stack: Why we chose Replit, Stripe, and your specific DB.
+
+The 'Sovereignty' Logic: Explain the technical choice to keep 1099-K math local vs. server-side.
+
+Data Flow: A text-based diagram showing how a receipt goes from the camera → AI Scanner → Vault → Tax Form."
+
+2. High-Value Commentary (Self-Documenting Code)
+
+Standard comments tell you what the code is doing. Acquisition-ready comments tell you why it’s doing it.
+
+Tell the Replit Agent:
+
+"Apply JSDoc/Docstring standards to every function. For the complex 1099-K matching and Gross-Up logic, add a 'Compliance Note' in the comments:
+
+// Compliance Note: This logic follows IRS Rev. Proc. 2026-XX regarding 1099-K reconciliation.
+
+// Why: We use a hash-based immutable storage to ensure audit-trail integrity for M&A due diligence."
+
+3. The "IP Cleanliness" Audit
+
+Big players are terrified of legal "taint" (e.g., using code that wasn't properly licensed).
+
+Tell the Replit Agent:
+
+"Create a LICENSES.md file.
+
+List every single 3rd-party library (NPM packages, APIs) we are using.
+
+Confirm all are under MIT or Apache 2.0 licenses.
+
+Crucial: Add a section stating that 100% of the custom logic was generated and owned by the company founder to ensure a 'Clean IP' chain of custody."
+
+4. The "Unit Test" Proof of Success
+
+A buyer won't believe your app works just because you say it does. They want to see automated tests passing.
+
+Tell the Replit Agent:
+
+"Build a /tests suite for the Tax Engine.
+
+Create 10 'Edge Case' scenarios (e.g., a driver with 5 states, or a driver with $0 income but $5,000 in mileage).
+
+If I run npm test, it should show 10/10 passing. This proves to a future buyer that our math is mathematically sound and stable."
+
+📂 Acquisition Data Room Checklist
+
+If a buyer comes knocking, you should be able to hand them this "Due Diligence Folder" instantly:
+
+Document	Purpose	Buyer's Reaction
+API Documentation	Shows how the app talks to Stripe/IRS.	"Integrates easily with our systems."
+Security Audit	Explains the encryption of the 7-Year Vault.	"Low risk of data breach."
+Scalability Plan	Explains how the app handles 1M+ drivers.	"This is a growth engine."
+Code Structure	Explains the modular "Bucket" system for 50 states.	"High-quality, professional build."
+Final Strategic Improvement: The "Admin Dashboard"
+
+A buyer needs to see the "Health" of the business, not just the code.
+
+Tell the Replit Agent:
+
+"Create a hidden /admin route (protected by Super-Admin Auth).
+
+This dashboard should show: Total Users, Total Taxes Filed, Total Revenue (via Stripe), and 'Audit Alerts' (how many users were flagged by our internal logic).
+
+Why: This is the 'Money Screen' that you show an acquirer to prove your app isn't just a tool, but a profitable business."

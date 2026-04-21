@@ -1,0 +1,106 @@
+{
+  "nav": {
+    "dashboard": "Instrumentpanel",
+    "income": "Inkomst",
+    "expenses": "Utgifter",
+    "mileage": "Körsträcka",
+    "receipts": "Kvitton",
+    "vehicles": "Fordon",
+    "export": "Exportera",
+    "auditDefense": "Revisionsförsvar",
+    "settings": "Inställningar",
+    "dac7": "DAC7-verktyg",
+    "currency": "Valuta",
+    "sync": "Gig-synk",
+    "signOut": "Logga ut",
+    "quarterly": "Kvartalsinlämning",
+    "estimatedTax": "Beräknad skatt",
+    "taxOverview": "Skatteöversikt"
+  },
+  "common": {
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "delete": "Ta bort",
+    "edit": "Redigera",
+    "add": "Lägg till",
+    "search": "Sök",
+    "filter": "Filtrera",
+    "loading": "Laddar...",
+    "noData": "Inga data hittades",
+    "confirm": "Bekräfta",
+    "back": "Tillbaka",
+    "next": "Nästa",
+    "submit": "Skicka in",
+    "upload": "Ladda upp",
+    "download": "Ladda ned",
+    "close": "Stäng",
+    "yes": "Ja",
+    "no": "Nej",
+    "total": "Totalt",
+    "date": "Datum",
+    "amount": "Belopp",
+    "category": "Kategori",
+    "description": "Beskrivning",
+    "actions": "Åtgärder",
+    "status": "Status",
+    "language": "Språk"
+  },
+  "dashboard": {
+    "title": "Instrumentpanel",
+    "welcome": "Välkommen tillbaka",
+    "taxSummary": "Skattesammanfattning",
+    "grossIncome": "Bruttoinkomst",
+    "totalExpenses": "Totala utgifter",
+    "mileageDeduction": "Körsträckeavdrag",
+    "netProfit": "Nettovinst",
+    "selfEmploymentTax": "Egenanställningsskatt",
+    "quarterlyEstimate": "Kvartalsskattning",
+    "recentActivity": "Senaste aktivitet",
+    "quickActions": "Snabbåtgärder",
+    "addIncome": "Lägg till inkomst",
+    "addExpense": "Lägg till utgift",
+    "logMileage": "Logga körsträcka",
+    "scanReceipt": "Skanna kvitto",
+    "moneySaved": "Sparat belopp",
+    "filingReadiness": "Inlämningsstatus"
+  },
+  "auth": {
+    "login": "Logga in",
+    "logout": "Logga ut",
+    "welcome": "Din skattesäsong, förenklad"
+  },
+  "region": {
+    "detected": "Det verkar som att du befinner dig i {{country}}.",
+    "switchPrompt": "Vill du byta till din lokala region?",
+    "switchRegion": "Byt region",
+    "dismiss": "Avfärda",
+    "detecting": "Identifierar din plats...",
+    "permissionDenied": "Platsåtkomst nekad"
+  },
+  "expenses": {
+    "title": "Utgifter",
+    "addExpense": "Lägg till utgift",
+    "editExpense": "Redigera utgift",
+    "noExpenses": "Inga utgifter registrerade ännu",
+    "merchant": "Säljare",
+    "receipt": "Kvitto",
+    "taxDeductible": "Avdragsgill",
+    "selectCategory": "Välj kategori"
+  },
+  "income": {
+    "title": "Inkomst",
+    "addIncome": "Lägg till inkomst",
+    "editIncome": "Redigera inkomst",
+    "noIncome": "Ingen inkomst registrerad ännu",
+    "source": "Källa",
+    "platform": "Plattform",
+    "tips": "Dricks"
+  },
+  "ai": {
+    "taxPredictor": {
+      "title": "Smart skatteprediktor",
+      "analyze": "Analysera",
+      "analyzing": "AI analyserar dina finansiella data..."
+    }
+  }
+}

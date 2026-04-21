@@ -1,0 +1,59 @@
+To build a truly national product, your Replit Agent needs a comprehensive states.json data file. This file will act as the "Brain" of your 50-state engine, telling the app exactly which math to apply based on the user's location.
+
+Below is the structured data for all 50 states, categorized by their 2026 tax status.
+
+🟢 Bucket 1: The "No Income Tax" States (9 States)
+
+For these states, your app should bypass the state filing screens entirely.
+
+States: Alaska (AK), Florida (FL), Nevada (NV), New Hampshire (NH), South Dakota (SD), Tennessee (TN), Texas (TX), Washington (WA), Wyoming (WY).
+
+2026 Logic: tax_type: "none".
+
+Value Prop: "Zero state tax filing required. Your $50 covers everything!"
+
+🔵 Bucket 2: The "Flat Tax" States (11 States)
+
+These states are the easiest to code—one single rate for everyone. | State | 2026 Flat Rate | Replit Logic Trigger | | :--- | :--- | :--- | | Arizona (AZ) | 2.5% | Simple multiplier | | Colorado (CO) | 4.4% | Simple multiplier | | Georgia (GA) | 4.99% | New flat rate for 2026 | | Idaho (ID) | 5.3% | Simple multiplier | | Illinois (IL) | 4.95% | Warning: IL 1099-K threshold is $1,000 | | Indiana (IN) | 2.95% | Declining rate; check for county tax | | Kentucky (KY) | 3.5% | Declining rate; check for local city tax | | Michigan (MI) | 4.25% | Check for city taxes (Detroit, etc.) | | Mississippi (MS) | 4.0% | First $10k is exempt | | North Carolina (NC)| 3.99% | Simple multiplier | | Utah (UT) | 4.55% | Simple multiplier |
+
+🟡 Bucket 3: The "Graduated" States (30 States + D.C.)
+
+These states use "Brackets." The app must look up the driver's income to find the right rate.
+
+Complex States: California (up to 13.3%), New York (up to 10.9%), Hawaii (11%), New Jersey (10.75%).
+
+2026 Replit Logic: tax_type: "graduated". You will provide the Agent with a brackets.json file for these states.
+
+🛡️ The "Local Tax" Specialist (The Secret Weapon)
+
+To truly "verify" state and local selection, the app must look for these 2026 local tax triggers:
+
+NYC / Yonkers: Automatic surcharge for NY residents in specific zips.
+
+Pennsylvania: The "Keystone" logic. If PA is selected, the app must ask for the PSD Code (Political Subdivision) to handle local Earned Income Tax.
+
+Ohio: Check for RITA (Regional Income Tax Agency) municipalities.
+
+🛠️ Final Replit "Master Config" Instruction
+
+When you are ready, paste this into Replit:
+
+"Generate a states.json configuration file for the SubmissionModule.
+
+Categorize all 50 states into 'none', 'flat', and 'graduated'.
+
+Apply 2026 Rates: Use Indiana (2.95%), Kentucky (3.5%), and Georgia (4.99%) as the updated flat rates.
+
+The 'Local' Flag: Add a boolean has_local_tax for NY, PA, OH, MI, and IN.
+
+Validation Logic: If has_local_tax is TRUE, trigger a follow-up screen asking for the user's specific city to calculate the local surcharge."
+
+How to Verify the Selection?
+
+Once Replit builds this, you can verify it by running a "State Test Suite":
+
+Test 1: Select Texas → App should skip state filing and show $0 state tax.
+
+Test 2: Select Indiana → App should multiply profit by 0.0295.
+
+Test 3: Select New York + NYC Zip → App should show Federal, State, and NYC City tax lines.

@@ -1,0 +1,2 @@
+{"sessionId":"e05f0d","location":"server/index.ts:140","message":"listen-options","data":{"platform":"win32","port":5000,"listenOpts":{"port":5000,"host":"0.0.0.0","reusePort":false}},"timestamp":1776030967639,"hypothesisId":"H1"}
+{"sessionId":"e05f0d","location":"server/index.ts:150","message":"listen-success","data":{"port":5000,"host":"0.0.0.0"},"timestamp":1776030967679,"hypothesisId":"H1"}

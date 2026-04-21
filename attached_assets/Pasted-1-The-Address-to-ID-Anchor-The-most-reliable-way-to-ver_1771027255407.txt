@@ -1,0 +1,60 @@
+1. The "Address-to-ID" Anchor
+
+The most reliable way to verify a state is to match it against the driver's legal documents.
+
+Tell the Replit Agent:
+
+"Integrate a StateVerificationGate.
+
+OCR Cross-Check: When the AI scans the Driver's License during onboarding, it must extract the 'State' field.
+
+Verification Logic: If the user selects a state in the UI that does not match their scanned ID, trigger a 'Residency Clarification' screen.
+
+The 'Moved' Exception: If they moved during the year, allow them to enter 'Start' and 'End' dates for each state, but require a photo of a utility bill for the new state as proof."
+
+2. The "Geo-Tax" Validation (Platform Data)
+
+Since these are gig workers, their platform data (Uber/Lyft/DoorDash) contains a goldmine of location evidence.
+
+Tell the Replit Agent:
+
+"Add a JurisdictionConsistency check:
+
+1099-K Address Match: Automatically extract the 'Payee Address' from the uploaded 1099-K. If the state on the 1099-K is different from the selected filing state, show a warning: 'Your platform records show you in [State A], but you are filing in [State B]. Please confirm your tax residency.'
+
+Mileage GPS Check: Review the mileage logs. If 90% of the miles were driven in a state other than the one selected for filing, flag this for the user. (This prevents people from 'hiding' income in no-tax states while living in high-tax states like CA or NY)."
+
+3. The 50-State "Ruleset" UI
+
+To handle all 50 states, the UI needs to be dynamic. When a user selects a state, the app should instantly display that state's "Tax Personality."
+
+State Selection Verification Screen (UI Mockup):
+
+User Input: Selects "Illinois."
+
+System Response: * "System verified: Illinois has a 4.95% Flat Tax."
+
+"Alert: Illinois requires filing if you earned over $1,000 (lower than the $20k Federal limit)."
+
+"Requirement: Please confirm you were a resident of Illinois for the full 12 months."
+
+4. The Final "Residency Affidavit"
+
+In the USA, "Intent" matters. Before the driver pays the $50, they should sign a specific statement regarding their state.
+
+Final Request for Replit:
+
+"Add a mandatory Residency Affidavit to the final checkout:
+
+I certify that I was a legal resident of [State] for the 2026 tax year.
+
+I understand that misrepresenting my residency to avoid state taxes is a crime (Tax Evasion).
+
+Action: Log this digital signature alongside the IP address of the device used to file."
+
+Summary of the 50-State "Safety Net"
+
+Verification Level	Method	Purpose
+Identity	OCR scan of Driver's License	Confirms legal residence.
+Operational	1099-K & Mileage Geo-tags	Confirms where money was actually earned.
+Legal	Signed Residency Affidavit	Transfers liability to the user.

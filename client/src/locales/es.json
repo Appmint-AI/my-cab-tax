@@ -1,0 +1,111 @@
+{
+  "nav": {
+    "dashboard": "Panel principal",
+    "income": "Ingresos",
+    "expenses": "Gastos",
+    "mileage": "Kilometraje",
+    "receipts": "Recibos",
+    "vehicles": "Vehículos",
+    "export": "Exportar",
+    "auditDefense": "Defensa de auditoría",
+    "settings": "Configuración",
+    "dac7": "Herramienta DAC7",
+    "currency": "Moneda",
+    "sync": "Sincronización Gig",
+    "signOut": "Cerrar sesión",
+    "quarterly": "Declaración trimestral",
+    "estimatedTax": "Impuesto estimado",
+    "taxOverview": "Resumen fiscal"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "add": "Agregar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "loading": "Cargando...",
+    "noData": "No se encontraron datos",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "submit": "Enviar",
+    "upload": "Subir",
+    "download": "Descargar",
+    "close": "Cerrar",
+    "yes": "Sí",
+    "no": "No",
+    "total": "Total",
+    "date": "Fecha",
+    "amount": "Monto",
+    "category": "Categoría",
+    "description": "Descripción",
+    "actions": "Acciones",
+    "status": "Estado",
+    "language": "Idioma"
+  },
+  "dashboard": {
+    "title": "Panel principal",
+    "welcome": "Bienvenido de nuevo",
+    "taxSummary": "Resumen fiscal",
+    "grossIncome": "Ingresos brutos",
+    "totalExpenses": "Gastos totales",
+    "mileageDeduction": "Deducción por kilometraje",
+    "netProfit": "Beneficio neto",
+    "selfEmploymentTax": "Impuesto autónomo",
+    "quarterlyEstimate": "Estimación trimestral",
+    "recentActivity": "Actividad reciente",
+    "quickActions": "Acciones rápidas",
+    "addIncome": "Agregar ingresos",
+    "addExpense": "Agregar gasto",
+    "logMileage": "Registrar kilometraje",
+    "scanReceipt": "Escanear recibo",
+    "moneySaved": "Dinero ahorrado",
+    "filingReadiness": "Estado de declaración"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "welcome": "Tu temporada de impuestos, simplificada"
+  },
+  "region": {
+    "detected": "Parece que estás en {{country}}.",
+    "switchPrompt": "¿Quieres cambiar a tu región local?",
+    "switchRegion": "Cambiar región",
+    "dismiss": "Descartar",
+    "detecting": "Detectando tu ubicación...",
+    "permissionDenied": "Acceso a ubicación denegado"
+  },
+  "expenses": {
+    "title": "Gastos",
+    "addExpense": "Agregar gasto",
+    "editExpense": "Editar gasto",
+    "noExpenses": "No hay gastos registrados todavía",
+    "merchant": "Comerciante",
+    "receipt": "Recibo",
+    "taxDeductible": "Deducible de impuestos",
+    "selectCategory": "Seleccionar categoría"
+  },
+  "income": {
+    "title": "Ingresos",
+    "addIncome": "Agregar ingresos",
+    "editIncome": "Editar ingresos",
+    "noIncome": "No hay ingresos registrados todavía",
+    "source": "Fuente",
+    "platform": "Plataforma",
+    "tips": "Propinas"
+  },
+  "ai": {
+    "taxPredictor": {
+      "title": "Predictor fiscal inteligente",
+      "analyze": "Analizar",
+      "analyzing": "La IA está analizando tus datos financieros..."
+    },
+    "voice": {
+      "tapToSpeak": "Toca para hablar",
+      "listening": "Escuchando...",
+      "processing": "Procesando..."
+    }
+  }
+}
