@@ -12,6 +12,9 @@ FROM node:20-slim AS runner
 
 WORKDIR /app
 
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
 COPY --from=builder /app/dist ./dist
 
 ENV NODE_ENV=production
