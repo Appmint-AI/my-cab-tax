@@ -18,7 +18,7 @@ RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
 
 ENV NODE_ENV=production
-ENV PORT=8080
+ENV _PORT=8080
 
 EXPOSE 8080
 
