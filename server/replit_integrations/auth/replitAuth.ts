@@ -37,8 +37,11 @@ function authStrategyName(req: Request): string {
 }
 
 function getAuth0Domain(): string {
-  const domain = process.env.AUTH0_DOMAIN;
+  let domain = process.env.AUTH0_DOMAIN?.trim();
   if (!domain) throw new Error("AUTH0_DOMAIN environment variable is required. Please set it in your Secrets.");
+  // Issuer URL is built as https://${domain}; strip accidental scheme/path (common in Cloud Secret typos)
+  domain = domain.replace(/^https?:\/\//i, "").replace(/\/.*$/, "");
+  if (!domain) throw new Error("AUTH0_DOMAIN is empty after sanitizing. Use host only, e.g. your-tenant.us.auth0.com");
   return domain;
 }
 
