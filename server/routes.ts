@@ -1884,7 +1884,7 @@ export async function registerRoutes(
   const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "founder@mycabtax.com";
 
   async function requireAdmin(req: Request, res: Response): Promise<boolean> {
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.claims?.sub;
     if (!userId) { res.status(401).json({ message: "Not authenticated" }); return false; }
     const user = await storage.getUser(userId);
     if (!user || !user.email || user.email.toLowerCase() !== ADMIN_EMAIL) {

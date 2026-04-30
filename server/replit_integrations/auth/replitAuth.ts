@@ -9,6 +9,33 @@ import connectPg from "connect-pg-simple";
 import { authStorage } from "./storage";
 import { detectCountryFromIP } from "../../geo-detect";
 
+/** OAuth callback / logout base URL (no trailing slash). Prefer env on Cloud Run so redirect_uri matches Auth0. */
+function getConfiguredPublicBaseUrl(): string | null {
+  const raw = process.env.AUTH0_BASE_URL?.trim() || process.env.APP_URL?.trim();
+  if (!raw) return null;
+  return raw.replace(/\/+$/, "");
+}
+
+function getPublicBaseUrl(req: Request): string {
+  const configured = getConfiguredPublicBaseUrl();
+  if (configured) return configured;
+
+  const xfProto = req.get("x-forwarded-proto");
+  const proto = (xfProto ? xfProto.split(",")[0] : "").trim() || req.protocol || "https";
+  const xfHost = req.get("x-forwarded-host");
+  const host =
+    (xfHost ? xfHost.split(",")[0] : "").trim() ||
+    (req.get("host") || "").trim() ||
+    req.hostname;
+  if (!host) return "http://localhost:5000";
+  return `${proto}://${host}`.replace(/\/+$/, "");
+}
+
+function authStrategyName(req: Request): string {
+  if (getConfiguredPublicBaseUrl()) return "auth0:app";
+  return `auth0:${req.hostname}`;
+}
+
 function getAuth0Domain(): string {
   const domain = process.env.AUTH0_DOMAIN;
   if (!domain) throw new Error("AUTH0_DOMAIN environment variable is required. Please set it in your Secrets.");
@@ -97,7 +124,6 @@ async function upsertUser(claims: any, detectedCountry?: string | null) {
 }
 
 export async function setupAuth(app: Express) {
-  app.set("trust proxy", 1);
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
@@ -117,7 +143,8 @@ export async function setupAuth(app: Express) {
     return;
   }
 
-  const config = await getOidcConfig();
+  // Defer OIDC discovery until first /api/login or /api/callback so Cloud Run can bind PORT=8080
+  // before any outbound call to Auth0 (cold start / slow networks were exceeding startup probes).
 
   const verify: VerifyFunction = async (
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
@@ -130,40 +157,69 @@ export async function setupAuth(app: Express) {
   };
 
   const registeredStrategies = new Set<string>();
+  const fixedPublicBase = getConfiguredPublicBaseUrl();
 
-  const ensureStrategy = (domain: string) => {
-    const strategyName = `auth0:${domain}`;
+  async function ensurePassportStrategies(req: Request) {
+    const config = await getOidcConfig();
+    if (fixedPublicBase) {
+      const strategyName = "auth0:app";
+      if (!registeredStrategies.has(strategyName)) {
+        passport.use(
+          new Strategy(
+            {
+              name: strategyName,
+              config,
+              scope: "openid email profile offline_access",
+              callbackURL: `${fixedPublicBase}/api/callback`,
+            },
+            verify
+          )
+        );
+        registeredStrategies.add(strategyName);
+      }
+      return;
+    }
+    const base = getPublicBaseUrl(req);
+    const strategyName = `auth0:${req.hostname}`;
     if (!registeredStrategies.has(strategyName)) {
-      const strategy = new Strategy(
-        {
-          name: strategyName,
-          config,
-          scope: "openid email profile offline_access",
-          callbackURL: `https://${domain}/api/callback`,
-        },
-        verify
+      passport.use(
+        new Strategy(
+          {
+            name: strategyName,
+            config,
+            scope: "openid email profile offline_access",
+            callbackURL: `${base}/api/callback`,
+          },
+          verify
+        )
       );
-      passport.use(strategy);
       registeredStrategies.add(strategyName);
     }
-  };
+  }
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-  app.get("/api/login", (req, res, next) => {
-    ensureStrategy(req.hostname);
-    const uiLocales = (req.query.lang as string) || req.acceptsLanguages("en", "ur", "ar", "vi") || "en";
-    passport.authenticate(`auth0:${req.hostname}`, {
-      prompt: "login",
-      scope: ["openid", "email", "profile", "offline_access"],
-      ui_locales: uiLocales,
-    })(req, res, next);
+  app.get("/api/login", async (req, res, next) => {
+    try {
+      await ensurePassportStrategies(req);
+      const name = authStrategyName(req);
+      const uiLocales = (req.query.lang as string) || req.acceptsLanguages("en", "ur", "ar", "vi") || "en";
+      passport.authenticate(name, {
+        prompt: "login",
+        scope: ["openid", "email", "profile", "offline_access"],
+        ui_locales: uiLocales,
+      })(req, res, next);
+    } catch (e) {
+      next(e);
+    }
   });
 
-  app.get("/api/callback", (req, res, next) => {
-    ensureStrategy(req.hostname);
-    passport.authenticate(`auth0:${req.hostname}`, async (err: any, user: any, info: any) => {
+  app.get("/api/callback", async (req, res, next) => {
+    try {
+      await ensurePassportStrategies(req);
+      const name = authStrategyName(req);
+      passport.authenticate(name, async (err: any, user: any, info: any) => {
       if (err) return next(err);
       if (!user) return res.redirect("/api/login");
 
@@ -197,13 +253,16 @@ export async function setupAuth(app: Express) {
         res.redirect("/");
       });
     })(req, res, next);
+    } catch (e) {
+      next(e);
+    }
   });
 
   app.get("/api/logout", (req, res) => {
     req.logout(() => {
       const auth0Domain = getAuth0Domain();
       const clientId = getAuth0ClientId();
-      const returnTo = `${req.protocol}://${req.hostname}`;
+      const returnTo = getPublicBaseUrl(req);
       const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${encodeURIComponent(clientId)}&returnTo=${encodeURIComponent(returnTo)}`;
       res.redirect(logoutUrl);
     });
