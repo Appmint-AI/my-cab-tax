@@ -21,7 +21,8 @@ function getPublicBaseUrl(req: Request): string {
   if (configured) return configured;
 
   const xfProto = req.get("x-forwarded-proto");
-  const proto = (xfProto ? xfProto.split(",")[0] : "").trim() || req.protocol || "https";
+  const proto =
+    (xfProto ? xfProto.split(",")[0] : "").trim() || req.protocol || "https";
   const xfHost = req.get("x-forwarded-host");
   const host =
     (xfHost ? xfHost.split(",")[0] : "").trim() ||
@@ -38,39 +39,116 @@ function authStrategyName(req: Request): string {
 
 function getAuth0Domain(): string {
   let domain = process.env.AUTH0_DOMAIN?.trim();
-  if (!domain) throw new Error("AUTH0_DOMAIN environment variable is required. Please set it in your Secrets.");
+  if (!domain)
+    throw new Error(
+      "AUTH0_DOMAIN environment variable is required. Please set it in your Secrets.",
+    );
   // Issuer URL is built as https://${domain}; strip accidental scheme/path (common in Cloud Secret typos)
   domain = domain.replace(/^https?:\/\//i, "").replace(/\/.*$/, "");
-  if (!domain) throw new Error("AUTH0_DOMAIN is empty after sanitizing. Use host only, e.g. your-tenant.us.auth0.com");
+  if (!domain)
+    throw new Error(
+      "AUTH0_DOMAIN is empty after sanitizing. Use host only, e.g. your-tenant.us.auth0.com",
+    );
   return domain;
 }
 
 function getAuth0ClientId(): string {
   const id = process.env.AUTH0_CLIENT_ID;
-  if (!id) throw new Error("AUTH0_CLIENT_ID environment variable is required. Please set it in your Secrets.");
+  if (!id)
+    throw new Error(
+      "AUTH0_CLIENT_ID environment variable is required. Please set it in your Secrets.",
+    );
   return id;
 }
 
 function getAuth0ClientSecret(): string {
   const secret = process.env.AUTH0_CLIENT_SECRET;
-  if (!secret) throw new Error("AUTH0_CLIENT_SECRET environment variable is required. Please set it in your Secrets.");
+  if (!secret)
+    throw new Error(
+      "AUTH0_CLIENT_SECRET environment variable is required. Please set it in your Secrets.",
+    );
   return secret;
 }
 
 function isAuth0Configured(): boolean {
-  return !!(process.env.AUTH0_DOMAIN && process.env.AUTH0_CLIENT_ID && process.env.AUTH0_CLIENT_SECRET);
+  return !!(
+    process.env.AUTH0_DOMAIN &&
+    process.env.AUTH0_CLIENT_ID &&
+    process.env.AUTH0_CLIENT_SECRET
+  );
 }
+
+/** Some proxies return valid OIDC JSON with a non-JSON Content-Type; oauth4webapi rejects that by default. */
+const authDiscoveryTolerantFetch: typeof fetch = async (input, init) => {
+  const res = await fetch(input, init);
+  if (!res.ok) return res;
+  const ct = (res.headers.get("content-type") || "").toLowerCase();
+  if (ct.includes("application/json")) return res;
+
+  const buf = await res.arrayBuffer();
+  const text = new TextDecoder().decode(buf).trim();
+  if (!text.startsWith("{")) {
+    return new Response(buf, {
+      status: res.status,
+      statusText: res.statusText,
+      headers: res.headers,
+    });
+  }
+  try {
+    const parsed = JSON.parse(text) as Record<string, unknown>;
+    if (parsed && typeof parsed === "object" && typeof parsed.issuer === "string") {
+      const headers = new Headers(res.headers);
+      headers.set("content-type", "application/json; charset=utf-8");
+      return new Response(buf, {
+        status: res.status,
+        statusText: res.statusText,
+        headers,
+      });
+    }
+  } catch {
+    /* fall through */
+  }
+  return new Response(buf, {
+    status: res.status,
+    statusText: res.statusText,
+    headers: res.headers,
+  });
+};
 
 const getOidcConfig = memoize(
   async () => {
-    const issuerUrl = `https://${getAuth0Domain()}`;
-    return await client.discovery(
-      new URL(issuerUrl),
-      getAuth0ClientId(),
-      getAuth0ClientSecret(),
-    );
+    const domain = getAuth0Domain();
+    const issuerBase = `https://${domain}`;
+    const wellKnown = `${issuerBase}/.well-known/openid-configuration`;
+
+    try {
+      return await client.discovery(
+        new URL(issuerBase),
+        getAuth0ClientId().trim(),
+        getAuth0ClientSecret().trim(),
+        undefined,
+        { [client.customFetch]: authDiscoveryTolerantFetch as any },
+      );
+    } catch (err: unknown) {
+      const baseMsg = err instanceof Error ? err.message : String(err);
+      let diagnostic = "";
+      try {
+        const probe = await fetch(wellKnown, {
+          headers: { Accept: "application/json" },
+          redirect: "follow",
+        });
+        const probeCt = probe.headers.get("content-type") || "";
+        const probeBody = (await probe.text()).slice(0, 220).replace(/\s+/g, " ");
+        diagnostic = ` [discovery probe: HTTP ${probe.status}, content-type="${probeCt}", body≈${probeBody}]`;
+      } catch (probeErr) {
+        diagnostic = ` [discovery probe failed: ${probeErr instanceof Error ? probeErr.message : String(probeErr)}]`;
+      }
+      throw new Error(
+        `${baseMsg}.${diagnostic} Fix: set AUTH0_DOMAIN to your Auth0 tenant hostname only (e.g. dev-abc123.us.auth0.com from Auth0 Dashboard → Settings → Domain).`,
+      );
+    }
   },
-  { maxAge: 3600 * 1000 }
+  { maxAge: 3600 * 1000, promise: true },
 );
 
 export function getSession() {
@@ -97,7 +175,7 @@ export function getSession() {
 
 function updateUserSession(
   user: any,
-  tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers
+  tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
 ) {
   user.claims = tokens.claims();
   user.access_token = tokens.access_token;
@@ -106,7 +184,9 @@ function updateUserSession(
 }
 
 function sanitizeEmail(raw: any): string | null {
-  const email = String(raw || "").trim().toLowerCase();
+  const email = String(raw || "")
+    .trim()
+    .toLowerCase();
   return email && email.includes("@") ? email : null;
 }
 
@@ -114,7 +194,11 @@ async function upsertUser(claims: any, detectedCountry?: string | null) {
   const userData: any = {
     id: claims["sub"],
     email: sanitizeEmail(claims["email"]),
-    firstName: claims["given_name"] || claims["first_name"] || claims["nickname"] || null,
+    firstName:
+      claims["given_name"] ||
+      claims["first_name"] ||
+      claims["nickname"] ||
+      null,
     lastName: claims["family_name"] || claims["last_name"] || null,
     profileImageUrl: claims["picture"] || claims["profile_image_url"] || null,
     lastLoginAt: new Date(),
@@ -132,10 +216,17 @@ export async function setupAuth(app: Express) {
   app.use(passport.session());
 
   if (!isAuth0Configured()) {
-    console.warn("Auth0 is not configured. Set AUTH0_DOMAIN, AUTH0_CLIENT_ID, and AUTH0_CLIENT_SECRET in your Secrets to enable authentication.");
+    console.warn(
+      "Auth0 is not configured. Set AUTH0_DOMAIN, AUTH0_CLIENT_ID, and AUTH0_CLIENT_SECRET in your Secrets to enable authentication.",
+    );
 
     app.get("/api/login", (_req, res) => {
-      res.status(503).json({ message: "Auth0 is not configured. Please set AUTH0_DOMAIN, AUTH0_CLIENT_ID, and AUTH0_CLIENT_SECRET." });
+      res
+        .status(503)
+        .json({
+          message:
+            "Auth0 is not configured. Please set AUTH0_DOMAIN, AUTH0_CLIENT_ID, and AUTH0_CLIENT_SECRET.",
+        });
     });
     app.get("/api/callback", (_req, res) => {
       res.status(503).json({ message: "Auth0 is not configured." });
@@ -151,7 +242,7 @@ export async function setupAuth(app: Express) {
 
   const verify: VerifyFunction = async (
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback
+    verified: passport.AuthenticateCallback,
   ) => {
     const user = {};
     updateUserSession(user, tokens);
@@ -175,8 +266,8 @@ export async function setupAuth(app: Express) {
               scope: "openid email profile offline_access",
               callbackURL: `${fixedPublicBase}/api/callback`,
             },
-            verify
-          )
+            verify,
+          ),
         );
         registeredStrategies.add(strategyName);
       }
@@ -193,8 +284,8 @@ export async function setupAuth(app: Express) {
             scope: "openid email profile offline_access",
             callbackURL: `${base}/api/callback`,
           },
-          verify
-        )
+          verify,
+        ),
       );
       registeredStrategies.add(strategyName);
     }
@@ -207,7 +298,10 @@ export async function setupAuth(app: Express) {
     try {
       await ensurePassportStrategies(req);
       const name = authStrategyName(req);
-      const uiLocales = (req.query.lang as string) || req.acceptsLanguages("en", "ur", "ar", "vi") || "en";
+      const uiLocales =
+        (req.query.lang as string) ||
+        req.acceptsLanguages("en", "ur", "ar", "vi") ||
+        "en";
       passport.authenticate(name, {
         prompt: "login",
         scope: ["openid", "email", "profile", "offline_access"],
@@ -223,39 +317,43 @@ export async function setupAuth(app: Express) {
       await ensurePassportStrategies(req);
       const name = authStrategyName(req);
       passport.authenticate(name, async (err: any, user: any, info: any) => {
-      if (err) return next(err);
-      if (!user) return res.redirect("/api/login");
+        if (err) return next(err);
+        if (!user) return res.redirect("/api/login");
 
-      req.logIn(user, async (loginErr) => {
-        if (loginErr) return next(loginErr);
+        req.logIn(user, async (loginErr) => {
+          if (loginErr) return next(loginErr);
 
-        const userId = user.claims?.sub;
-        if (userId) {
-          const clientIp = req.ip || req.socket.remoteAddress || "";
-          try {
-            let existingUser = await authStorage.getUser(userId);
-            if (!existingUser) {
-              existingUser = await authStorage.upsertUser({
-                id: userId,
-                email: sanitizeEmail(user.claims?.email),
-                firstName: user.claims?.given_name || user.claims?.nickname || null,
-                lastName: user.claims?.family_name || null,
-                profileImageUrl: user.claims?.picture || null,
-                lastLoginAt: new Date(),
-                inactivityEmailSent: null,
-              });
-            }
-            if (!existingUser?.detectedCountry) {
-              const geo = await detectCountryFromIP(clientIp);
-              if (geo) {
-                await authStorage.updateDetectedCountry(userId, geo.countryCode);
+          const userId = user.claims?.sub;
+          if (userId) {
+            const clientIp = req.ip || req.socket.remoteAddress || "";
+            try {
+              let existingUser = await authStorage.getUser(userId);
+              if (!existingUser) {
+                existingUser = await authStorage.upsertUser({
+                  id: userId,
+                  email: sanitizeEmail(user.claims?.email),
+                  firstName:
+                    user.claims?.given_name || user.claims?.nickname || null,
+                  lastName: user.claims?.family_name || null,
+                  profileImageUrl: user.claims?.picture || null,
+                  lastLoginAt: new Date(),
+                  inactivityEmailSent: null,
+                });
               }
-            }
-          } catch {}
-        }
-        res.redirect("/");
-      });
-    })(req, res, next);
+              if (!existingUser?.detectedCountry) {
+                const geo = await detectCountryFromIP(clientIp);
+                if (geo) {
+                  await authStorage.updateDetectedCountry(
+                    userId,
+                    geo.countryCode,
+                  );
+                }
+              }
+            } catch {}
+          }
+          res.redirect("/");
+        });
+      })(req, res, next);
     } catch (e) {
       next(e);
     }
