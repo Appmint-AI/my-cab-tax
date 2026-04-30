@@ -21,7 +21,7 @@ export default function Landing() {
             <div className="bg-primary p-1.5 rounded-md text-primary-foreground">
               <CarFront className="w-5 h-5" />
             </div>
-            <span className="font-semibold text-lg tracking-tight">My Cab Tax</span>
+            <span className="font-semibold text-lg tracking-tight">My Cab  55345345Tax</span>
           </div>
           <Button onClick={login} variant="outline" data-testid="button-login-nav">
             Log In
