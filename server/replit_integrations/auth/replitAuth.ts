@@ -37,6 +37,8 @@ function authStrategyName(req: Request): string {
   return `auth0:${req.hostname}`;
 }
 
+
+
 function getAuth0Domain(): string {
   let domain = process.env.AUTH0_DOMAIN?.trim();
   if (!domain)
