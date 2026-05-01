@@ -24,9 +24,6 @@ export default function Landing() {
             <span className="font-semibold text-lg tracking-tight">My Cab  Tax</span>
           </div>
 
-
-
-  
           <Button onClick={login} variant="outline" data-testid="button-login-nav">
             Log In
           </Button>
