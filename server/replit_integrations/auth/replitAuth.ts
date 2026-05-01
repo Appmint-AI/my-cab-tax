@@ -37,7 +37,45 @@ function authStrategyName(req: Request): string {
   return `auth0:${req.hostname}`;
 }
 
+function hostnameFromEnvUrl(raw: string | undefined): string | null {
+  if (!raw?.trim()) return null;
+  const s = raw.trim().replace(/\/+$/, "");
+  try {
+    const u = new URL(s.startsWith("http") ? s : `https://${s}`);
+    return u.hostname.toLowerCase() || null;
+  } catch {
+    return null;
+  }
+}
 
+/** Reject common misconfiguration: AUTH0_DOMAIN set to the app URL instead of the Auth0 tenant. */
+function assertAuth0DomainIsTenantHost(domain: string): void {
+  const lower = domain.toLowerCase();
+
+  if (lower.includes(".run.app")) {
+    throw new Error(
+      `AUTH0_DOMAIN is "${domain}" — that is a Google Cloud Run hostname, not Auth0. ` +
+        `Set AUTH0_DOMAIN to your Auth0 tenant from Dashboard → Settings → Domain (e.g. dev-xxxxx.us.auth0.com). ` +
+        `Keep APP_URL as your Cloud Run URL for OAuth callbacks only.`,
+    );
+  }
+
+  for (const envKey of ["APP_URL", "AUTH0_BASE_URL"] as const) {
+    const appHost = hostnameFromEnvUrl(process.env[envKey]);
+    if (appHost && lower === appHost) {
+      throw new Error(
+        `AUTH0_DOMAIN must not match ${envKey} host (${appHost}). ` +
+          `Use your Auth0 tenant hostname (e.g. dev-xxxxx.us.auth0.com), not your deployed app URL.`,
+      );
+    }
+  }
+
+  if (lower === "localhost" || lower.startsWith("127.")) {
+    throw new Error(
+      `AUTH0_DOMAIN cannot be localhost for this setup. Use your Auth0 tenant hostname (e.g. dev-xxxxx.us.auth0.com).`,
+    );
+  }
+}
 
 function getAuth0Domain(): string {
   let domain = process.env.AUTH0_DOMAIN?.trim();
@@ -51,6 +89,7 @@ function getAuth0Domain(): string {
     throw new Error(
       "AUTH0_DOMAIN is empty after sanitizing. Use host only, e.g. your-tenant.us.auth0.com",
     );
+  assertAuth0DomainIsTenantHost(domain);
   return domain;
 }
 
@@ -98,7 +137,11 @@ const authDiscoveryTolerantFetch: typeof fetch = async (input, init) => {
   }
   try {
     const parsed = JSON.parse(text) as Record<string, unknown>;
-    if (parsed && typeof parsed === "object" && typeof parsed.issuer === "string") {
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      typeof parsed.issuer === "string"
+    ) {
       const headers = new Headers(res.headers);
       headers.set("content-type", "application/json; charset=utf-8");
       return new Response(buf, {
@@ -140,7 +183,9 @@ const getOidcConfig = memoize(
           redirect: "follow",
         });
         const probeCt = probe.headers.get("content-type") || "";
-        const probeBody = (await probe.text()).slice(0, 220).replace(/\s+/g, " ");
+        const probeBody = (await probe.text())
+          .slice(0, 220)
+          .replace(/\s+/g, " ");
         diagnostic = ` [discovery probe: HTTP ${probe.status}, content-type="${probeCt}", body≈${probeBody}]`;
       } catch (probeErr) {
         diagnostic = ` [discovery probe failed: ${probeErr instanceof Error ? probeErr.message : String(probeErr)}]`;
@@ -223,12 +268,10 @@ export async function setupAuth(app: Express) {
     );
 
     app.get("/api/login", (_req, res) => {
-      res
-        .status(503)
-        .json({
-          message:
-            "Auth0 is not configured. Please set AUTH0_DOMAIN, AUTH0_CLIENT_ID, and AUTH0_CLIENT_SECRET.",
-        });
+      res.status(503).json({
+        message:
+          "Auth0 is not configured. Please set AUTH0_DOMAIN, AUTH0_CLIENT_ID, and AUTH0_CLIENT_SECRET.",
+      });
     });
     app.get("/api/callback", (_req, res) => {
       res.status(503).json({ message: "Auth0 is not configured." });
