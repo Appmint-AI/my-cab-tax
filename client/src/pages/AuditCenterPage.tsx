@@ -23,6 +23,8 @@ import {
   CheckCircle,
   Lock,
   Crown,
+
+  
   ArrowRight,
   BarChart3,
   TrendingUp,
