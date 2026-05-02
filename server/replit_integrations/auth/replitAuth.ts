@@ -415,6 +415,12 @@ export async function setupAuth(app: Express) {
   });
 }
 
+/** One refresh in flight per Auth0 subject — concurrent requests used to double-call refreshTokenGrant and invalidate the rotated refresh token (401 on PATCH while GET succeeded). */
+const refreshInflight = new Map<
+  string,
+  Promise<Awaited<ReturnType<typeof client.refreshTokenGrant>>>
+>();
+
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
@@ -453,12 +459,26 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return;
   }
 
+  const lockKey = userId || req.sessionID;
+  let inflight = refreshInflight.get(lockKey);
+  if (!inflight) {
+    const rt = refreshToken;
+    inflight = (async () => {
+      try {
+        const config = await getOidcConfig();
+        return await client.refreshTokenGrant(config, rt);
+      } finally {
+        refreshInflight.delete(lockKey);
+      }
+    })();
+    refreshInflight.set(lockKey, inflight);
+  }
+
   try {
-    const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+    const tokenResponse = await inflight;
     updateUserSession(user, tokenResponse);
     return next();
-  } catch (error) {
+  } catch {
     res.status(401).json({ message: "Unauthorized" });
     return;
   }

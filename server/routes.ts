@@ -1359,7 +1359,7 @@ export async function registerRoutes(
   // ========== TAX JURISDICTION ROUTES ==========
 
   app.get("/api/jurisdiction", isAuthenticated, async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const user = await storage.getUser(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -1377,7 +1377,7 @@ export async function registerRoutes(
   });
 
   app.patch("/api/user/segment", isAuthenticated, async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
 
     const segmentSchema = z.object({
@@ -1418,7 +1418,7 @@ export async function registerRoutes(
   });
 
   app.patch("/api/jurisdiction", isAuthenticated, async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
 
     const VALID_STATES = [
@@ -1454,7 +1454,7 @@ export async function registerRoutes(
   });
 
   app.post("/api/local-tax/generate", isAuthenticated, async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
     try {
       const user = await storage.getUser(userId);
@@ -1635,7 +1635,7 @@ export async function registerRoutes(
   });
 
   app.get("/api/submission-readiness", isAuthenticated, async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
     try {
       const user = await storage.getUser(userId);
@@ -1690,14 +1690,14 @@ export async function registerRoutes(
   // ========== AUDIT CENTER ROUTES ==========
 
   app.get("/api/audit-notices", isAuthenticated, async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const notices = await storage.getAuditNotices(userId);
     res.json(notices);
   });
 
   app.post("/api/audit-notices/upload", isAuthenticated, receiptUpload.single("file"), async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const user = await storage.getUser(userId);
     if (!user || user.subscriptionStatus !== "pro") {
@@ -1727,7 +1727,7 @@ export async function registerRoutes(
   });
 
   app.post("/api/audit-dossier/generate", isAuthenticated, async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const user = await storage.getUser(userId);
     if (!user || user.subscriptionStatus !== "pro") {
@@ -1783,7 +1783,7 @@ export async function registerRoutes(
   // ========== ODOMETER ROUTES ==========
 
   app.post("/api/dl/upload-scan", isAuthenticated, receiptUpload.single("file"), async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const file = req.file;
     if (!file) return res.status(400).json({ message: "No file uploaded" });
@@ -1814,7 +1814,7 @@ export async function registerRoutes(
   });
 
   app.post("/api/dl/utility-bill", isAuthenticated, receiptUpload.single("file"), async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const file = req.file;
     if (!file) return res.status(400).json({ message: "No file uploaded" });
@@ -1829,7 +1829,7 @@ export async function registerRoutes(
   });
 
   app.patch("/api/dl/residency", isAuthenticated, async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
 
     const schema = z.object({
@@ -1855,7 +1855,7 @@ export async function registerRoutes(
   });
 
   app.post("/api/odometer/upload-photo", isAuthenticated, receiptUpload.single("file"), async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const file = req.file;
     if (!file) return res.status(400).json({ message: "No file uploaded" });
@@ -1864,7 +1864,7 @@ export async function registerRoutes(
   });
 
   app.get("/api/odometer-checkins", isAuthenticated, async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const vehicleId = req.query.vehicleId ? Number(req.query.vehicleId) : undefined;
     const checkins = await storage.getOdometerCheckins(userId, vehicleId);
@@ -1872,7 +1872,7 @@ export async function registerRoutes(
   });
 
   app.post("/api/odometer-checkins", isAuthenticated, async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
     const { insertOdometerCheckinSchema } = await import("@shared/schema");
     const parsed = insertOdometerCheckinSchema.safeParse(req.body);
