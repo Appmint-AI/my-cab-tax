@@ -4,6 +4,7 @@ import { Layout } from "@/components/Layout";
 import { useTaxSummary } from "@/hooks/use-tax";
 import { useAuth } from "@/hooks/use-auth";
 import { useRegion } from "@/hooks/use-region";
+import { useSubscription } from "@/hooks/use-subscription";
 import { IncomeForm } from "@/components/forms/IncomeForm";
 import { ExpenseForm } from "@/components/forms/ExpenseForm";
 import { Form1099K } from "@/components/forms/Form1099K";
