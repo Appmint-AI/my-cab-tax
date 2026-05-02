@@ -137,9 +137,9 @@ export default function VerifyPage() {
       apiRequest("POST", "/api/verify-identity", {
         fullName,
         driversLicenseState,
-        driversLicenseNumber: driversLicenseNumber.length > 0 ? "***" : "",
+        driversLicenseNumber,
         address: { street, city, state, zipCode },
-        ssn4: ssn4.length === 4 ? "****" : "",
+        ssn4,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });

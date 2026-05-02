@@ -895,9 +895,10 @@ export async function registerRoutes(
           street: z.string().min(1),
           city: z.string().min(1),
           state: z.string().length(2),
-          zipCode: z.string().min(5).max(10),
+          // US ZIP is 5 or 9+4; allow shorter international postal codes (e.g. AU "2000")
+          zipCode: z.string().trim().min(3).max(15),
         }),
-        ssn4: z.string().min(1),
+        ssn4: z.string().regex(/^\d{4}$/, "Enter the last 4 digits of your SSN"),
       });
 
       verifySchema.parse(req.body);
