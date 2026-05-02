@@ -44,7 +44,7 @@ import JSZip from "jszip";
 import { jsPDF } from "jspdf";
 import { IRS_MILEAGE_RATE, STANDARD_DEDUCTION_2026 } from "@shared/schema";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { TaxSummary, MileageLog } from "@shared/schema";
+import type { TaxSummary, MileageLog, AuditRiskResult } from "@shared/schema";
 import { SubmissionSuccess } from "@/components/SubmissionSuccess";
 import { useLocation } from "wouter";
 import type { User } from "@shared/models/auth";
@@ -625,19 +625,14 @@ function TaxHealthBar({ summary, user }: { summary: TaxSummary; user: User | nul
   );
 }
 
-interface AuditRiskResult {
-  overallRisk: "low" | "medium" | "high";
-  riskScore: number;
-  totalExpenses: number;
-  categoryBreakdown: { category: string; amount: number; average: number; deviation: number; flag: string }[];
-  recommendations: string[];
-}
-
 function AuditRiskBadge() {
   const { t } = useTranslation();
   const { data: riskData } = useQuery<AuditRiskResult>({ queryKey: ["/api/audit-risk"] });
 
-  if (!riskData || riskData.totalExpenses === 0) return null;
+  const totalExpenses =
+    riskData?.categoryRisks?.reduce((sum, c) => sum + (c.userAmount || 0), 0) ?? 0;
+
+  if (!riskData || totalExpenses === 0) return null;
 
   const riskColors = {
     low: { bg: "bg-green-50 dark:bg-green-950/20", border: "border-green-200 dark:border-green-800", text: "text-green-700 dark:text-green-400", badge: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
@@ -646,7 +641,7 @@ function AuditRiskBadge() {
   };
   const colors = riskColors[riskData.overallRisk];
   const riskLabel = { low: t("dashboard.lowRisk"), medium: t("dashboard.mediumRisk"), high: t("dashboard.highRisk") };
-  const flaggedCategories = riskData.categoryBreakdown.filter(c => c.deviation > 20);
+  const flaggedCategories = (riskData.categoryRisks ?? []).filter((c) => c.deviationPct > 20);
 
   return (
     <div className={`rounded-md border ${colors.border} ${colors.bg} p-4`} data-testid="banner-audit-risk">
@@ -658,7 +653,7 @@ function AuditRiskBadge() {
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`text-sm font-medium ${colors.text}`}>{t("dashboard.auditSentinel")}</span>
             <Badge variant="outline" className={`text-[10px] no-default-active-elevate ${colors.badge}`} data-testid="badge-audit-risk-level">
-              {riskLabel[riskData.overallRisk]} — Score {riskData.riskScore}
+              {riskLabel[riskData.overallRisk]} — Score {riskData.totalScore}
             </Badge>
           </div>
           {flaggedCategories.length > 0 && (
