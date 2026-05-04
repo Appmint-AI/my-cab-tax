@@ -91,7 +91,7 @@ function VerifiedRoute({ component: Component }: { component: React.ComponentTyp
     return <Redirect to="/pick-industry" />;
   }
 
-  if (user && !user.isVerified) {
+  if (user && !user.isVerified && !user.isVip) {
     return <Redirect to="/verify" />;
   }
 

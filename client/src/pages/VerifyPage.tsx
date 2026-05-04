@@ -1,5 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, type FormEvent } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useRegion } from "@/hooks/use-region";
+import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSegmentConfig } from "@/lib/segment-config";
 import { apiRequest } from "@/lib/queryClient";
@@ -75,10 +77,205 @@ const LOCAL_JURISDICTIONS: Record<string, { code: string; name: string; rate: nu
   ],
 };
 
+const UK_SELF_ASSESSMENT_AREAS = [
+  { code: "ENG", label: "England" },
+  { code: "SCT", label: "Scotland" },
+  { code: "WLS", label: "Wales" },
+  { code: "NIE", label: "Northern Ireland" },
+];
+
+function UKVerifyEntry() {
+  const { user } = useAuth();
+  const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [fullName, setFullName] = useState(
+    `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
+  );
+  const [street, setStreet] = useState("");
+  const [city, setCity] = useState("");
+  const [county, setCounty] = useState("");
+  const [postcode, setPostcode] = useState("");
+  const [drivingLicenceNumber, setDrivingLicenceNumber] = useState("");
+  const [niLast4, setNiLast4] = useState("");
+  const [ukRegion, setUkRegion] = useState<string>("ENG");
+  const [pending, setPending] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!fullName.trim() || !drivingLicenceNumber.trim() || niLast4.length !== 4 || !ukRegion) {
+      toast({ title: "Missing information", description: "Complete all required fields.", variant: "destructive" });
+      return;
+    }
+    setPending(true);
+    try {
+      await apiRequest("POST", "/api/verify-identity", {
+        fullName: fullName.trim(),
+        drivingLicenceNumber: drivingLicenceNumber.trim(),
+        address: {
+          street: street.trim(),
+          city: city.trim(),
+          postcode: postcode.trim(),
+          ...(county.trim() ? { county: county.trim() } : {}),
+        },
+        niLast4,
+      });
+      await apiRequest("PATCH", "/api/jurisdiction", {
+        stateCode: ukRegion,
+        localTaxEnabled: false,
+        localTaxJurisdiction: null,
+      });
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/jurisdiction"] });
+      toast({
+        title: "Identity verified",
+        description: "Your UK tax profile is set. You can finish vehicle details from the dashboard.",
+      });
+      navigate("/dashboard");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Please try again.";
+      toast({ title: "Verification failed", description: msg, variant: "destructive" });
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <Layout>
+      <div className="max-w-xl mx-auto space-y-6 py-4">
+        <div className="text-center space-y-2">
+          <ShieldCheck className="h-10 w-10 text-primary mx-auto" />
+          <h1 className="text-3xl font-display font-bold" data-testid="text-verify-uk-title">
+            UK driver verification
+          </h1>
+          <p className="text-muted-foreground text-sm max-w-md mx-auto">
+            HMRC and Making Tax Digital require we confirm who is using this account. Provide your UK photocard
+            licence details and National Insurance digits — not a US driver licence or IRS checklist.
+          </p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BadgeCheck className="h-5 w-5" />
+              Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div>
+                <Label htmlFor="uk-fullName">Full legal name</Label>
+                <Input
+                  id="uk-fullName"
+                  data-testid="input-uk-fullname"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  autoComplete="name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="uk-dl">Driving licence number (UK photocard)</Label>
+                <Input
+                  id="uk-dl"
+                  data-testid="input-uk-licence"
+                  value={drivingLicenceNumber}
+                  onChange={(e) => setDrivingLicenceNumber(e.target.value)}
+                  placeholder="As shown on your licence"
+                  autoComplete="off"
+                />
+              </div>
+              <div>
+                <Label htmlFor="uk-ni">Last 4 digits of your National Insurance number</Label>
+                <Input
+                  id="uk-ni"
+                  data-testid="input-uk-ni"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={niLast4}
+                  onChange={(e) => setNiLast4(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                  placeholder="••••"
+                  autoComplete="off"
+                />
+              </div>
+              <Separator />
+              <div>
+                <Label htmlFor="uk-hmrc">Tax area (HMRC Self Assessment)</Label>
+                <p className="text-xs text-muted-foreground mb-1.5">
+                  Choose where you file Self Assessment — tax bands differ in Scotland vs England &amp; NI.
+                </p>
+                <Select value={ukRegion} onValueChange={setUkRegion}>
+                  <SelectTrigger id="uk-hmrc" data-testid="select-uk-hmrc-region">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {UK_SELF_ASSESSMENT_AREAS.map(({ code, label }) => (
+                      <SelectItem key={code} value={code}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="uk-street">Street address</Label>
+                <Input
+                  id="uk-street"
+                  data-testid="input-uk-street"
+                  value={street}
+                  onChange={(e) => setStreet(e.target.value)}
+                  autoComplete="street-address"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="uk-city">City / town</Label>
+                  <Input
+                    id="uk-city"
+                    data-testid="input-uk-city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="uk-county">County (optional)</Label>
+                  <Input
+                    id="uk-county"
+                    data-testid="input-uk-county"
+                    value={county}
+                    onChange={(e) => setCounty(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="uk-postcode">Postcode</Label>
+                <Input
+                  id="uk-postcode"
+                  data-testid="input-uk-postcode"
+                  value={postcode}
+                  onChange={(e) => setPostcode(e.target.value.toUpperCase())}
+                  autoComplete="postal-code"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                By continuing you confirm the information matches your licence and HMRC records. We use this only for
+                fraud prevention and regulatory compliance (UK GDPR).
+              </p>
+              <Button type="submit" className="w-full" disabled={pending} data-testid="button-uk-verify-submit">
+                {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify and continue"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </Layout>
+  );
+}
+
 const TOTAL_STEPS = 8;
 
 export default function VerifyPage() {
   const { user } = useAuth();
+  const { isUK } = useRegion();
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
 
@@ -282,6 +479,10 @@ export default function VerifyPage() {
         </div>
       </Layout>
     );
+  }
+
+  if (!user?.isVerified && isUK) {
+    return <UKVerifyEntry />;
   }
 
   if (step === 8) {

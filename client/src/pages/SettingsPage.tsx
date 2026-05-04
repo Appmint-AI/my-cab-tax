@@ -30,9 +30,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Trash2, User, FileText, AlertTriangle, XCircle, MessageSquare, MapPin, Building, Download, Loader2, CheckCircle, CarFront, Package, ArrowLeftRight, Layers, Eye, EyeOff } from "lucide-react";
+import { Shield, Trash2, User, FileText, AlertTriangle, XCircle, MessageSquare, MapPin, Building, Download, Loader2, CheckCircle, CarFront, Package, ArrowLeftRight, Layers, Eye, EyeOff, Crown } from "lucide-react";
 import { format } from "date-fns";
 import { Link } from "wouter";
+import { useRegion } from "@/hooks/use-region";
 
 const US_STATES = [
   "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
@@ -42,8 +43,16 @@ const US_STATES = [
   "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY", "DC",
 ];
 
+const UK_SELF_ASSESSMENT_AREA_LABELS: Record<string, string> = {
+  ENG: "England",
+  SCT: "Scotland",
+  WLS: "Wales",
+  NIE: "Northern Ireland",
+};
+
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { isUK } = useRegion();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -130,6 +139,8 @@ export default function SettingsPage() {
 
       <DisplayPreferences />
 
+      <TesterToolsCard />
+
       <TaxJurisdictionSettings />
 
       <Card>
@@ -168,7 +179,18 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-foreground/80 leading-relaxed">
-            Under the California Consumer Privacy Act (CCPA), Virginia Consumer Data Protection Act (VCDPA), and other applicable state privacy laws, you have the right to request permanent deletion of your personal data. This satisfies your "Right to be Forgotten" under state privacy laws. This action cannot be undone.
+            {isUK ? (
+              <>
+                Under the UK GDPR and the Data Protection Act 2018, you may request access, correction, or permanent
+                erasure of your personal data. This action cannot be undone once processed.
+              </>
+            ) : (
+              <>
+                Under the California Consumer Privacy Act (CCPA), Virginia Consumer Data Protection Act (VCDPA), and
+                other applicable state privacy laws, you have the right to request permanent deletion of your personal
+                data. This satisfies your &quot;Right to be Forgotten&quot; under state privacy laws. This action cannot be undone.
+              </>
+            )}
           </p>
 
           <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -330,7 +352,12 @@ export default function SettingsPage() {
                     <div className="flex items-start gap-2 p-3 rounded-md bg-destructive/5 border border-destructive/20">
                       <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                       <p className="text-xs leading-relaxed">
-                        <strong>IRS Reminder:</strong> The IRS requires you to keep tax records for at least 3 years. Make sure you have exported or saved your records before proceeding.
+                        <strong>{isUK ? "HMRC reminder:" : "IRS Reminder:"}</strong>{" "}
+                        {isUK ? (
+                          <>HMRC recommends keeping Self Assessment records for at least 5 years after the 31 January deadline. Export or save your records before proceeding.</>
+                        ) : (
+                          <>The IRS requires you to keep tax records for at least 3 years. Make sure you have exported or saved your records before proceeding.</>
+                        )}
                       </p>
                     </div>
                     <div className="space-y-2 pt-1">
@@ -370,12 +397,54 @@ export default function SettingsPage() {
   );
 }
 
+function TesterToolsCard() {
+  const { user } = useAuth();
+
+  return (
+    <Card data-testid="card-tester-tools">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Crown className="h-5 w-5 text-amber-600" />
+          Admin &amp; VIP testing
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm text-foreground/80 leading-relaxed">
+        <p>
+          <strong>VIP</strong> is not toggled on this screen. Super-admins grant &quot;VIP&quot; (complimentary Pro and
+          verification bypass for bulk testers) from the{" "}
+          <Link href="/admin" className="text-primary underline-offset-2 hover:underline font-medium">
+            Admin Dashboard
+          </Link>{" "}
+          under <strong>VIP User Management</strong> — search by email, then grant or revoke.
+        </p>
+        {user?.isVip ? (
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge className="bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30">
+              <Crown className="h-3 w-3 mr-1" />
+              {user.vipLabel || "VIP tester"}
+            </Badge>
+            <span className="text-xs text-muted-foreground">
+              Verification gate is skipped while you remain VIP on this device.
+            </span>
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Need VIP for a pilot cohort? Ask a super-admin — there is no public self-serve VIP switch for security reasons.
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 interface JurisdictionData {
   stateCode: string | null;
   localTaxEnabled: boolean;
   localTaxJurisdiction: string | null;
   noIncomeTaxStates: string[];
   localJurisdictions: Record<string, { name: string; rate: number; portalUrl: string }>;
+  filingRegion?: "US" | "UK";
+  ukSelfAssessmentRegions?: string[];
 }
 
 function DisplayPreferences() {
@@ -509,6 +578,7 @@ function IndustrySegmentSettings() {
 function TaxJurisdictionSettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isUK, formatCurrency } = useRegion();
 
   const { data: jurisdiction, isLoading } = useQuery<JurisdictionData>({
     queryKey: ["/api/jurisdiction"],
@@ -520,20 +590,27 @@ function TaxJurisdictionSettings() {
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
-    if (jurisdiction) {
-      setStateCode(jurisdiction.stateCode || "");
-      setLocalTaxEnabled(jurisdiction.localTaxEnabled);
-      setLocalTaxJurisdiction(jurisdiction.localTaxJurisdiction || "");
-    }
+    if (!jurisdiction) return;
+    setStateCode(jurisdiction.stateCode || "");
+    setLocalTaxEnabled(jurisdiction.localTaxEnabled);
+    setLocalTaxJurisdiction(jurisdiction.localTaxJurisdiction || "");
   }, [jurisdiction]);
 
   const saveMutation = useMutation({
-    mutationFn: () =>
-      apiRequest("PATCH", "/api/jurisdiction", {
+    mutationFn: () => {
+      if (isUK) {
+        return apiRequest("PATCH", "/api/jurisdiction", {
+          stateCode: stateCode || null,
+          localTaxEnabled: false,
+          localTaxJurisdiction: null,
+        });
+      }
+      return apiRequest("PATCH", "/api/jurisdiction", {
         stateCode: stateCode || null,
         localTaxEnabled,
-        localTaxJurisdiction: localTaxEnabled ? (localTaxJurisdiction || null) : null,
-      }),
+        localTaxJurisdiction: localTaxEnabled ? localTaxJurisdiction || null : null,
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/jurisdiction"] });
       toast({ title: "Saved", description: "Tax jurisdiction settings updated." });
@@ -561,8 +638,8 @@ function TaxJurisdictionSettings() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       toast({ title: "Downloaded", description: "Local tax statement PDF has been downloaded." });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      toast({ title: "Error", description: err instanceof Error ? err.message : "Failed", variant: "destructive" });
     } finally {
       setGenerating(false);
     }
@@ -572,6 +649,11 @@ function TaxJurisdictionSettings() {
   const isNoTaxState = stateCode ? noTaxStates.includes(stateCode) : false;
   const localJurisdictions = jurisdiction?.localJurisdictions || {};
   const selectedLocal = localTaxJurisdiction ? localJurisdictions[localTaxJurisdiction] : null;
+  const filingFee = formatCurrency(50);
+  const ukRegionOptions =
+    jurisdiction?.ukSelfAssessmentRegions && jurisdiction.ukSelfAssessmentRegions.length > 0
+      ? jurisdiction.ukSelfAssessmentRegions
+      : (["ENG", "SCT", "WLS", "NIE"] as const);
 
   if (isLoading) {
     return (
@@ -579,7 +661,7 @@ function TaxJurisdictionSettings() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Tax Filing Jurisdiction
+            Tax filing jurisdiction
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -587,6 +669,61 @@ function TaxJurisdictionSettings() {
             <Loader2 className="h-4 w-4 animate-spin" />
             Loading jurisdiction settings...
           </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isUK) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Tax jurisdiction (HMRC)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <p className="text-sm text-muted-foreground">
+            Confirm where you submit Self Assessment. Your {filingFee} filing fee covers MTD-aligned preparation and HMRC
+            submission workflow for UK drivers — not US states or IRS forms.
+          </p>
+          <div className="space-y-2">
+            <Label htmlFor="uk-sa-region">Nation / HMRC region</Label>
+            <Select value={stateCode && ukRegionOptions.includes(stateCode) ? stateCode : ""} onValueChange={setStateCode}>
+              <SelectTrigger id="uk-sa-region" data-testid="select-jurisdiction-uk-region">
+                <SelectValue placeholder="Choose England, Scotland, Wales, or Northern Ireland" />
+              </SelectTrigger>
+              <SelectContent>
+                {(ukRegionOptions.length > 0 ? ukRegionOptions : ["ENG", "SCT", "WLS", "NIE"]).map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {UK_SELF_ASSESSMENT_AREA_LABELS[code] || code}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Counties and UTR specifics are captured during filing; this setting drives tax-band logic (e.g. Scottish rates)
+              throughout the UK tools.
+            </p>
+          </div>
+          <Separator />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            US city &amp; local earned-income filings (IRS CF/SF) do not apply in the UK. Switch region back to the United States
+            in Global Tax Centre if this account should follow IRS rules instead.
+          </p>
+          <Button
+            onClick={() => saveMutation.mutate()}
+            disabled={saveMutation.isPending || !stateCode}
+            data-testid="button-save-jurisdiction"
+          >
+            {saveMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <CheckCircle className="mr-2 h-4 w-4" />
+            )}
+            Save UK jurisdiction
+          </Button>
         </CardContent>
       </Card>
     );
@@ -602,18 +739,21 @@ function TaxJurisdictionSettings() {
       </CardHeader>
       <CardContent className="space-y-5">
         <p className="text-sm text-muted-foreground">
-          Configure your state and local tax filing settings. Your $50 filing fee covers Federal + State + Local — the complete bundle.
+          Configure your state and local tax filing settings. Your {filingFee} filing fee covers Federal + State + Local — the
+          complete bundle.
         </p>
 
         <div className="space-y-2">
           <Label htmlFor="stateCode">Filing State</Label>
           <Select value={stateCode} onValueChange={setStateCode}>
-            <SelectTrigger data-testid="select-jurisdiction-state">
+            <SelectTrigger id="stateCode" data-testid="select-jurisdiction-state">
               <SelectValue placeholder="Select your state" />
             </SelectTrigger>
             <SelectContent>
               {US_STATES.map((s) => (
-                <SelectItem key={s} value={s}>{s}</SelectItem>
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -634,7 +774,8 @@ function TaxJurisdictionSettings() {
           )}
           {stateCode && !isNoTaxState && (
             <p className="text-xs text-muted-foreground">
-              Your federal return data will be automatically forwarded to {stateCode} via the IRS Combined Federal/State Filing (CF/SF) Program. No separate state filing needed.
+              Your federal return data will be automatically forwarded to {stateCode} via the IRS Combined Federal/State Filing
+              (CF/SF) Program. No separate state filing needed.
             </p>
           )}
         </div>
@@ -665,7 +806,7 @@ function TaxJurisdictionSettings() {
               <div>
                 <Label htmlFor="localJurisdiction">Local Jurisdiction</Label>
                 <Select value={localTaxJurisdiction} onValueChange={setLocalTaxJurisdiction}>
-                  <SelectTrigger data-testid="select-local-jurisdiction">
+                  <SelectTrigger id="localJurisdiction" data-testid="select-local-jurisdiction">
                     <SelectValue placeholder="Select your jurisdiction" />
                   </SelectTrigger>
                   <SelectContent>
@@ -682,10 +823,13 @@ function TaxJurisdictionSettings() {
                 <div className="p-3 rounded-lg border border-border/60 bg-muted/30 space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-medium">{selectedLocal.name}</span>
-                    <Badge variant="outline" className="no-default-active-elevate text-xs">{selectedLocal.rate}% rate</Badge>
+                    <Badge variant="outline" className="no-default-active-elevate text-xs">
+                      {selectedLocal.rate}% rate
+                    </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    As of 2026, {selectedLocal.name} may require electronic filing. MCTUSA will generate a Local EIT Statement PDF you can upload to the city portal.
+                    As of 2026, {selectedLocal.name} may require electronic filing. MCTUSA will generate a Local EIT Statement
+                    PDF you can upload to the city portal.
                   </p>
                   <Button
                     size="sm"
@@ -694,7 +838,11 @@ function TaxJurisdictionSettings() {
                     disabled={generating}
                     data-testid="button-generate-local-pdf"
                   >
-                    {generating ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Download className="mr-1 h-3 w-3" />}
+                    {generating ? (
+                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                    ) : (
+                      <Download className="mr-1 h-3 w-3" />
+                    )}
                     Download Local Tax Statement
                   </Button>
                 </div>
@@ -703,11 +851,7 @@ function TaxJurisdictionSettings() {
           )}
         </div>
 
-        <Button
-          onClick={() => saveMutation.mutate()}
-          disabled={saveMutation.isPending}
-          data-testid="button-save-jurisdiction"
-        >
+        <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} data-testid="button-save-jurisdiction">
           {saveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
           Save Jurisdiction Settings
         </Button>

@@ -28,7 +28,7 @@ export function validatePreSubmission(data: SubmissionData, user?: User): Valida
   const warnings: ValidationError[] = [];
   const preflightChecks: PreflightCheck[] = [];
 
-  const idVerified = !!user?.isVerified;
+  const idVerified = !!user?.isVerified || user?.isVip === true;
   preflightChecks.push({ label: "Identity Verified", passed: idVerified, required: true });
   if (!idVerified) {
     errors.push({

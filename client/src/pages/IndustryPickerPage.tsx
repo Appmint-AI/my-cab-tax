@@ -19,7 +19,7 @@ export default function IndustryPickerPage() {
       apiRequest("PATCH", "/api/user/segment", { segment }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      navigate(currentUser?.isVerified ? "/dashboard" : "/verify");
+      navigate(currentUser?.isVerified || currentUser?.isVip ? "/dashboard" : "/verify");
     },
   });
 

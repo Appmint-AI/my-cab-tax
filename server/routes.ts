@@ -887,7 +887,11 @@ export async function registerRoutes(
   app.post("/api/verify-identity", isAuthenticated, async (req, res) => {
     try {
       const userId = (req.user as any).claims.sub;
-      const verifySchema = z.object({
+      const user = await storage.getUser(userId);
+      const { getRegionFromCountry } = await import("./geo-detect");
+      const region = getRegionFromCountry(user?.detectedCountry);
+
+      const usVerifySchema = z.object({
         fullName: z.string().min(2),
         driversLicenseState: z.string().length(2),
         driversLicenseNumber: z.string().min(1),
@@ -895,13 +899,29 @@ export async function registerRoutes(
           street: z.string().min(1),
           city: z.string().min(1),
           state: z.string().length(2),
-          // US ZIP is 5 or 9+4; allow shorter international postal codes (e.g. AU "2000")
           zipCode: z.string().trim().min(3).max(15),
         }),
         ssn4: z.string().regex(/^\d{4}$/, "Enter the last 4 digits of your SSN"),
       });
 
-      verifySchema.parse(req.body);
+      const ukVerifySchema = z.object({
+        fullName: z.string().min(2),
+        drivingLicenceNumber: z.string().min(5).max(18),
+        address: z.object({
+          street: z.string().min(1),
+          city: z.string().min(1),
+          postcode: z.string().trim().min(5).max(12),
+          county: z.string().trim().max(120).optional(),
+        }),
+        niLast4: z.string().regex(/^\d{4}$/, "Enter the last 4 digits of your National Insurance number"),
+      });
+
+      if (region === "UK") {
+        ukVerifySchema.parse(req.body);
+      } else {
+        usVerifySchema.parse(req.body);
+      }
+
       await storage.verifyUser(userId);
       res.json({ success: true, message: "Identity verified successfully." });
     } catch (err) {
@@ -1365,6 +1385,8 @@ export async function registerRoutes(
     const user = await storage.getUser(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
     const { NO_INCOME_TAX_STATES, HIGH_LOCAL_TAX_JURISDICTIONS } = await import("./submission/irs-adapter");
+    const { getRegionFromCountry, UK_SELF_ASSESSMENT_REGIONS } = await import("./geo-detect");
+    const region = getRegionFromCountry(user.detectedCountry);
     res.json({
       stateCode: user.stateCode || null,
       localTaxEnabled: user.localTaxEnabled || false,
@@ -1374,6 +1396,8 @@ export async function registerRoutes(
       tipIncomeAmount: user.tipIncomeAmount || null,
       noIncomeTaxStates: NO_INCOME_TAX_STATES,
       localJurisdictions: HIGH_LOCAL_TAX_JURISDICTIONS,
+      filingRegion: region === "UK" ? "UK" : "US",
+      ukSelfAssessmentRegions: [...UK_SELF_ASSESSMENT_REGIONS],
     });
   });
 
@@ -1422,6 +1446,36 @@ export async function registerRoutes(
     const userId = (req.user as any)?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
 
+    const user = await storage.getUser(userId);
+    if (!user) return res.status(404).json({ message: "Not found" });
+
+    const { getRegionFromCountry, UK_SELF_ASSESSMENT_REGIONS } = await import("./geo-detect");
+    const filingRegion = getRegionFromCountry(user.detectedCountry);
+
+    if (filingRegion === "UK") {
+      const ukSchema = z.object({
+        stateCode: z.enum([...UK_SELF_ASSESSMENT_REGIONS]).nullable(),
+        localTaxEnabled: z.boolean().optional(),
+        localTaxJurisdiction: z.string().nullable().optional(),
+        partialYearResident: z.boolean().optional(),
+        partialYearStates: z.array(z.string()).optional(),
+        tipIncomeAmount: z.string().nullable().optional(),
+      });
+      const parsed = ukSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid jurisdiction data", errors: parsed.error.flatten().fieldErrors });
+      }
+      await storage.updateUserJurisdiction(userId, {
+        stateCode: parsed.data.stateCode ?? undefined,
+        localTaxEnabled: false,
+        localTaxJurisdiction: null,
+        partialYearResident: false,
+        partialYearStates: [],
+        tipIncomeAmount: parsed.data.tipIncomeAmount ?? undefined,
+      });
+      return res.json({ success: true });
+    }
+
     const VALID_STATES = [
       "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD",
       "MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC",
@@ -1430,11 +1484,11 @@ export async function registerRoutes(
     const { HIGH_LOCAL_TAX_JURISDICTIONS } = await import("./submission/irs-adapter");
 
     const jurisdictionSchema = z.object({
-      stateCode: z.string().refine(s => VALID_STATES.includes(s), { message: "Invalid state code" }).nullable(),
+      stateCode: z.string().refine((s) => VALID_STATES.includes(s), { message: "Invalid state code" }).nullable(),
       localTaxEnabled: z.boolean(),
-      localTaxJurisdiction: z.string().refine(s => s in HIGH_LOCAL_TAX_JURISDICTIONS, { message: "Invalid local jurisdiction" }).nullable(),
+      localTaxJurisdiction: z.string().refine((s) => s in HIGH_LOCAL_TAX_JURISDICTIONS, { message: "Invalid local jurisdiction" }).nullable(),
       partialYearResident: z.boolean().optional(),
-      partialYearStates: z.array(z.string().refine(s => VALID_STATES.includes(s))).optional(),
+      partialYearStates: z.array(z.string().refine((s) => VALID_STATES.includes(s))).optional(),
       tipIncomeAmount: z.string().nullable().optional(),
     });
 
@@ -2514,9 +2568,10 @@ TOP STATES BY USER COUNT: ${topStates || "No state data available"}
     try {
       const userId = (req.user as any).claims.sub;
       const { countryCode } = z.object({ countryCode: z.string().length(2) }).parse(req.body);
-      await storage.updateUser(userId, { detectedCountry: countryCode.toUpperCase() });
-      const { getRegionConfig } = await import("./geo-detect");
-      const config = getRegionConfig(countryCode.toUpperCase());
+      const { normalizeCountryCodeInput, getRegionConfig } = await import("./geo-detect");
+      const normalized = normalizeCountryCodeInput(countryCode);
+      await storage.updateUser(userId, { detectedCountry: normalized });
+      const config = getRegionConfig(normalized);
       res.json(config);
     } catch (error: any) {
       res.status(400).json({ message: error.message });

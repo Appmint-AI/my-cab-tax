@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./use-auth";
 import { apiRequest } from "@/lib/queryClient";
@@ -36,6 +37,30 @@ const DEFAULT_US_CONFIG: RegionConfig = {
   },
 };
 
+const DEFAULT_UK_CONFIG: RegionConfig = {
+  region: "UK",
+  currency: "GBP",
+  currencySymbol: "£",
+  locale: "en-GB",
+  taxModules: {
+    showScheduleC: false,
+    showEstimatedTax: false,
+    showSelfEmploymentTax: false,
+    showMTDQuarterly: true,
+    showUniversalCredit: true,
+    showFinalDeclaration: true,
+    showTaxOverview: true,
+  },
+};
+
+function inferredRegionBeforeConfigLoads(detectedCountry: string | null | undefined): RegionType | null {
+  if (!detectedCountry) return null;
+  const c = detectedCountry.trim().toUpperCase();
+  if (c === "GB" || c === "UK") return "UK";
+  if (c === "US") return "US";
+  return null;
+}
+
 export function useRegion() {
   const { user, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
@@ -54,10 +79,16 @@ export function useRegion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/region-config"] });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jurisdiction"] });
     },
   });
 
-  const config = regionConfig || DEFAULT_US_CONFIG;
+  const inferred = inferredRegionBeforeConfigLoads(user?.detectedCountry ?? null);
+  const config = useMemo(() => {
+    if (regionConfig) return regionConfig;
+    if (inferred === "UK") return DEFAULT_UK_CONFIG;
+    return DEFAULT_US_CONFIG;
+  }, [regionConfig, inferred]);
 
   const formatCurrency = (amount: number): string => {
     try {

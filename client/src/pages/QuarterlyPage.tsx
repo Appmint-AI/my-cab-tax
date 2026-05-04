@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Layout } from "@/components/Layout";
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalendarClock, CheckCircle, Clock, AlertTriangle, Send, RefreshCw, Shield, FileText, Inbox, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useRegion } from "@/hooks/use-region";
 
 interface QuarterlySub {
   id: number;
@@ -46,9 +47,14 @@ interface EInvoice {
 export default function QuarterlyPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { isUK } = useRegion();
   const [selectedYear, setSelectedYear] = useState("2026");
   const [selectedQuarter, setSelectedQuarter] = useState("1");
-  const [selectedJurisdiction, setSelectedJurisdiction] = useState("US");
+  const [selectedJurisdiction, setSelectedJurisdiction] = useState<"US" | "UK">("US");
+
+  useEffect(() => {
+    setSelectedJurisdiction(isUK ? "UK" : "US");
+  }, [isUK]);
 
   const { data: submissions, isLoading: subsLoading } = useQuery<QuarterlySub[]>({
     queryKey: ["/api/quarterly-submissions"],

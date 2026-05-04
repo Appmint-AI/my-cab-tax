@@ -52,16 +52,27 @@ export async function detectCountryFromIP(ip: string): Promise<GeoResult | null>
 
 export type RegionType = "US" | "UK" | "CA" | "MX" | "NO" | "SE" | "DK" | "EU" | "MY" | "CN" | "ID" | "BR" | "ZA" | "NG" | "OTHER";
 
+/** UK Self Assessment jurisdiction (England, Scotland, Wales, Northern Ireland) — distinct tax bands/rules. */
+export const UK_SELF_ASSESSMENT_REGIONS = ["ENG", "SCT", "WLS", "NIE"] as const;
+export type UkSelfAssessmentRegion = (typeof UK_SELF_ASSESSMENT_REGIONS)[number];
+
 const EU_COUNTRIES = new Set([
   "AT","BE","BG","HR","CY","CZ","EE","FI","FR","DE","GR","HU",
   "IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK","SI","ES",
 ]);
 
+/** ISO 3166-1 alpha-2 for persistence; callers may send "UK" colloquially. */
+export function normalizeCountryCodeInput(countryCode: string): string {
+  const c = countryCode.trim().toUpperCase();
+  if (c === "UK") return "GB";
+  return c;
+}
+
 export function getRegionFromCountry(countryCode: string | null | undefined): RegionType {
   if (!countryCode) return "US";
-  const code = countryCode.toUpperCase();
+  const code = countryCode.trim().toUpperCase();
+  if (code === "UK" || code === "GB") return "UK";
   if (code === "US") return "US";
-  if (code === "GB") return "UK";
   if (code === "CA") return "CA";
   if (code === "MX") return "MX";
   if (code === "NO") return "NO";
