@@ -30,10 +30,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Trash2, User, FileText, AlertTriangle, XCircle, MessageSquare, MapPin, Building, Download, Loader2, CheckCircle, CarFront, Package, ArrowLeftRight, Layers, Eye, EyeOff, Crown } from "lucide-react";
+import { Shield, Trash2, User, FileText, AlertTriangle, XCircle, MessageSquare, MapPin, Building, Download, Loader2, CheckCircle, CarFront, Package, ArrowLeftRight, Layers, Eye, EyeOff, Crown, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { Link } from "wouter";
 import { useRegion } from "@/hooks/use-region";
+import i18n from "@/lib/i18n";
+import { REGION_DEFAULT_LANGUAGE } from "@/lib/i18n";
 
 const US_STATES = [
   "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
@@ -138,6 +140,8 @@ export default function SettingsPage() {
       <IndustrySegmentSettings />
 
       <DisplayPreferences />
+
+      <ManualCountryRegionSettings />
 
       <TesterToolsCard />
 
@@ -494,6 +498,107 @@ function DisplayPreferences() {
             Simplified View is active — sidebar shows icons only. Hover over icons to see labels.
           </div>
         )}
+      </CardContent>
+    </Card>
+  );
+}
+
+const MANUAL_REGION_OPTIONS = [
+  { code: "GB", label: "United Kingdom", hint: "HMRC · GBP (£) · tax year runs 6 Apr → 5 Apr" },
+  { code: "US", label: "United States", hint: "IRS · USD ($) · calendar tax year (Jan–Dec)" },
+  { code: "CA", label: "Canada", hint: "CRA · CAD · calendar-year tracking for summaries" },
+] as const;
+
+function ManualCountryRegionSettings() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { detectedCountry, flag, region, currencySymbol } = useRegion();
+  const [selectedCode, setSelectedCode] = useState<string>(() => detectedCountry || "US");
+
+  useEffect(() => {
+    setSelectedCode(detectedCountry || "US");
+  }, [detectedCountry]);
+
+  const saveMutation = useMutation({
+    mutationFn: (countryCode: string) => apiRequest("PATCH", "/api/user/detected-country", { countryCode }),
+    onSuccess: (_res, countryCode) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user/region-config"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jurisdiction"] });
+      const lang = REGION_DEFAULT_LANGUAGE[countryCode];
+      if (lang) i18n.changeLanguage(lang);
+      toast({
+        title: "Home region updated",
+        description: `Currency and tax rules now follow ${countryCode}. Use this while traveling or when testing with a VPN.`,
+      });
+    },
+    onError: () => {
+      toast({ title: "Could not update region", description: "Try again shortly.", variant: "destructive" });
+    },
+  });
+
+  const selectedHint =
+    MANUAL_REGION_OPTIONS.find((o) => o.code === selectedCode)?.hint ??
+    "Choose where you primarily file taxes.";
+
+  return (
+    <Card data-testid="card-manual-region">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Globe className="h-5 w-5" />
+          Home country (manual override)
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          On first login we detect country from your IP address (behind Cloud Run this uses your real client IP, not the
+          server region). Browser GPS may also suggest updates. Set your filing home country here when you&apos;re abroad
+          or need a persistent override.
+        </p>
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-muted-foreground">Active profile:</span>
+          <Badge variant="secondary" className="gap-1" data-testid="badge-active-region">
+            <span>{flag}</span>
+            <span>{region}</span>
+            <span className="opacity-70">({currencySymbol})</span>
+          </Badge>
+          {detectedCountry ? (
+            <span className="text-xs text-muted-foreground font-mono" data-testid="text-stored-country">
+              ISO: {detectedCountry}
+            </span>
+          ) : null}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="manual-region">Reporting country</Label>
+          <Select value={selectedCode} onValueChange={setSelectedCode}>
+            <SelectTrigger id="manual-region" data-testid="select-manual-region">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {MANUAL_REGION_OPTIONS.map((o) => (
+                <SelectItem key={o.code} value={o.code}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">{selectedHint}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => saveMutation.mutate(selectedCode)}
+            disabled={saveMutation.isPending || !selectedCode || selectedCode === detectedCountry}
+            data-testid="button-save-manual-region"
+          >
+            {saveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Globe className="mr-2 h-4 w-4" />}
+            Apply region
+          </Button>
+          <Link href="/global-tax">
+            <Button type="button" variant="outline" data-testid="link-global-tax-from-settings">
+              All countries → Global Tax
+            </Button>
+          </Link>
+        </div>
       </CardContent>
     </Card>
   );

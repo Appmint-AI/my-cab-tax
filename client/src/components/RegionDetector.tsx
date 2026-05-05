@@ -12,6 +12,13 @@ interface GeoResult {
   countryCode: string;
 }
 
+function normalizeCountryCodeForCompare(code: string | null | undefined): string | null {
+  if (!code || typeof code !== "string") return null;
+  const u = code.trim().toUpperCase();
+  if (u === "UK") return "GB";
+  return u;
+}
+
 export function RegionDetector() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -37,8 +44,10 @@ export function RegionDetector() {
           );
           const data = await res.json();
           if (data.countryName && data.countryCode) {
-            const userCountry = detectedCountry || ((user as any)?.stateCode ? "US" : null);
-            if (!userCountry || data.countryCode !== userCountry) {
+            const rawStored = detectedCountry || ((user as { stateCode?: string })?.stateCode ? "US" : null);
+            const normalizedStored = normalizeCountryCodeForCompare(rawStored);
+            const normalizedGps = normalizeCountryCodeForCompare(data.countryCode);
+            if (!normalizedStored || normalizedGps !== normalizedStored) {
               setGeoResult({
                 countryName: data.countryName,
                 countryCode: data.countryCode,

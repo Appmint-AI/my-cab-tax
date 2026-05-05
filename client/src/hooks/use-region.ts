@@ -53,11 +53,28 @@ const DEFAULT_UK_CONFIG: RegionConfig = {
   },
 };
 
+const DEFAULT_CA_CONFIG: RegionConfig = {
+  region: "CA",
+  currency: "CAD",
+  currencySymbol: "CA$",
+  locale: "en-CA",
+  taxModules: {
+    showScheduleC: false,
+    showEstimatedTax: true,
+    showSelfEmploymentTax: true,
+    showMTDQuarterly: false,
+    showUniversalCredit: false,
+    showFinalDeclaration: false,
+    showTaxOverview: true,
+  },
+};
+
 function inferredRegionBeforeConfigLoads(detectedCountry: string | null | undefined): RegionType | null {
   if (!detectedCountry) return null;
   const c = detectedCountry.trim().toUpperCase();
   if (c === "GB" || c === "UK") return "UK";
   if (c === "US") return "US";
+  if (c === "CA") return "CA";
   return null;
 }
 
@@ -87,6 +104,7 @@ export function useRegion() {
   const config = useMemo(() => {
     if (regionConfig) return regionConfig;
     if (inferred === "UK") return DEFAULT_UK_CONFIG;
+    if (inferred === "CA") return DEFAULT_CA_CONFIG;
     return DEFAULT_US_CONFIG;
   }, [regionConfig, inferred]);
 

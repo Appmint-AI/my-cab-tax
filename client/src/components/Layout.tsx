@@ -77,7 +77,7 @@ export function Layout({ children }: LayoutProps) {
     { href: "/sync", label: t("nav.sync"), icon: RefreshCw, simplifiedIcon: RefreshCw },
     { href: "/dac7", label: t("nav.dac7"), icon: FileSpreadsheet, simplifiedIcon: FileSpreadsheet },
     { href: "/currency", label: t("nav.currency"), icon: Banknote, simplifiedIcon: Banknote },
-    { href: "/quarterly", label: isUK ? t("nav.quarterly") : t("nav.estimatedTax", "Estimated Tax"), icon: CalendarClock, simplifiedIcon: CalendarClock, regions: ["US", "UK"] as const },
+    { href: "/quarterly", label: isUK ? t("nav.quarterly") : t("nav.estimatedTax", "Estimated Tax"), icon: CalendarClock, simplifiedIcon: CalendarClock, regions: ["US", "UK", "CA"] as const },
     { href: "/tax-overview", label: t("nav.taxOverview", "Tax Overview"), icon: FileText, simplifiedIcon: FileText, regions: ["UK"] as const },
     { href: "/global-tax", label: "Global Tax", icon: Globe, simplifiedIcon: Globe },
     { href: "/settings", label: t("nav.settings"), icon: Settings, simplifiedIcon: Wrench },

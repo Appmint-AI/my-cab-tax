@@ -13,6 +13,7 @@ import path from "path";
 import fs from "fs";
 import { uploadToVault, getReceiptSignedUrl, deleteFromVault, getReceiptBuffer } from "./receipt-vault";
 import { scanReceiptWithAI } from "./receipt-ocr";
+import { getClientIp } from "./client-ip";
 
 const UPLOADS_DIR = path.join(process.cwd(), "uploads", "receipts");
 
@@ -674,7 +675,7 @@ export async function registerRoutes(
     const parsed = schema.safeParse(req.body || {});
     const version = parsed.success ? parsed.data.version : "1.0";
     const userId = (req.user as any).claims.sub;
-    const ipAddress = req.headers["x-forwarded-for"]?.toString()?.split(",")[0]?.trim() || req.socket.remoteAddress || null;
+    const ipAddress = getClientIp(req);
     const userAgent = req.headers["user-agent"] || null;
     await storage.acceptTerms(userId, version, ipAddress || undefined, userAgent || undefined);
     const { triggerWelcomeEmail } = await import("./lifecycle-manager");
@@ -935,7 +936,7 @@ export async function registerRoutes(
   app.post("/api/audit-log", isAuthenticated, async (req, res) => {
     try {
       const userId = (req.user as any).claims.sub;
-      const ipAddress = req.headers["x-forwarded-for"]?.toString()?.split(",")[0]?.trim() || req.socket.remoteAddress || null;
+      const ipAddress = getClientIp(req);
       const userAgent = req.headers["user-agent"] || null;
 
       const auditLogSchema = z.object({
@@ -965,7 +966,7 @@ export async function registerRoutes(
   app.post("/api/submissions/generate", isAuthenticated, async (req, res) => {
     try {
       const userId = (req.user as any).claims.sub;
-      const ipAddress = req.headers["x-forwarded-for"]?.toString()?.split(",")[0]?.trim() || req.socket.remoteAddress || null;
+      const ipAddress = getClientIp(req);
       const userAgent = req.headers["user-agent"] || null;
 
       const submitSchema = z.object({
@@ -1015,7 +1016,7 @@ export async function registerRoutes(
   app.post("/api/submissions/finalize", isAuthenticated, async (req, res) => {
     try {
       const userId = (req.user as any).claims.sub;
-      const ipAddress = req.headers["x-forwarded-for"]?.toString()?.split(",")[0]?.trim() || req.socket.remoteAddress || null;
+      const ipAddress = getClientIp(req);
       const userAgent = req.headers["user-agent"] || null;
 
       const finalizeSchema = z.object({

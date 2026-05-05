@@ -47,14 +47,21 @@ interface EInvoice {
 export default function QuarterlyPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { isUK } = useRegion();
+  const { isUK, isCA, formatCurrency } = useRegion();
   const [selectedYear, setSelectedYear] = useState("2026");
   const [selectedQuarter, setSelectedQuarter] = useState("1");
   const [selectedJurisdiction, setSelectedJurisdiction] = useState<"US" | "UK">("US");
 
   useEffect(() => {
-    setSelectedJurisdiction(isUK ? "UK" : "US");
+    if (isUK) setSelectedJurisdiction("UK");
+    else setSelectedJurisdiction("US");
   }, [isUK]);
+
+  useEffect(() => {
+    if (isCA && selectedJurisdiction === "UK") {
+      setSelectedJurisdiction("US");
+    }
+  }, [isCA, selectedJurisdiction]);
 
   const { data: submissions, isLoading: subsLoading } = useQuery<QuarterlySub[]>({
     queryKey: ["/api/quarterly-submissions"],
@@ -140,7 +147,20 @@ export default function QuarterlyPage() {
                 <CardTitle className="text-base">{t("quarterly.generate", "Generate Quarterly Summary")}</CardTitle>
               </div>
               <CardDescription>
-                {t("quarterly.generateDesc", "Scan your vault data and prepare a quarterly filing summary for IRS (1040-ES) or HMRC (MTD).")}
+                {isUK
+                  ? t(
+                      "quarterly.generateDescUk",
+                      "Prepare MTD-aligned quarterly summaries for HMRC. UK tax years run 6 April through 5 April.",
+                    )
+                  : isCA
+                    ? t(
+                        "quarterly.generateDescCa",
+                        "Prepare calendar-year quarterly summaries suited to CRA self-employment tracking (matches standard Jan–Dec windows).",
+                      )
+                    : t(
+                        "quarterly.generateDesc",
+                        "Scan your vault data and prepare a quarterly filing summary for IRS (1040-ES) or HMRC (MTD).",
+                      )}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -152,10 +172,15 @@ export default function QuarterlyPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="2025">2025</SelectItem>
-                      <SelectItem value="2026">2026</SelectItem>
+                      <SelectItem value="2025">{isUK ? "2025/26" : "2025"}</SelectItem>
+                      <SelectItem value="2026">{isUK ? "2026/27" : "2026"}</SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-[10px] text-muted-foreground mt-1 max-w-[10rem] leading-tight">
+                    {isUK
+                      ? t("quarterly.ukYearFootnote", "Year = 6 Apr start (MTD)")
+                      : t("quarterly.calendarYearFootnote", "Jan–Dec calendar year")}
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs text-muted-foreground">{t("quarterly.quarter", "Quarter")}</label>
@@ -173,13 +198,13 @@ export default function QuarterlyPage() {
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs text-muted-foreground">{t("quarterly.jurisdiction", "Jurisdiction")}</label>
-                  <Select value={selectedJurisdiction} onValueChange={setSelectedJurisdiction}>
-                    <SelectTrigger className="w-32" data-testid="select-jurisdiction">
+                  <Select value={selectedJurisdiction} onValueChange={(v: "US" | "UK") => setSelectedJurisdiction(v)}>
+                    <SelectTrigger className="min-w-[9.5rem] w-max max-w-[14rem]" data-testid="select-jurisdiction">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="US">US (IRS)</SelectItem>
-                      <SelectItem value="UK">UK (HMRC MTD)</SelectItem>
+                      <SelectItem value="US">{isCA ? "Canada (CRA, calendar)" : "US (IRS)"}</SelectItem>
+                      {!isCA ? <SelectItem value="UK">UK (HMRC MTD)</SelectItem> : null}
                     </SelectContent>
                   </Select>
                 </div>
@@ -195,6 +220,15 @@ export default function QuarterlyPage() {
                   )}
                 </Button>
               </div>
+
+              {isCA && selectedJurisdiction === "US" && (
+                <div className="mt-3 p-2 rounded bg-muted/50 border border-border/60 text-xs text-muted-foreground">
+                  {t(
+                    "quarterly.caCalendarNote",
+                    "Canadian drivers: quarterly windows follow the calendar-year schedule shared with IRS-style estimates in this workflow.",
+                  )}
+                </div>
+              )}
 
               {selectedJurisdiction === "UK" && (
                 <div className="mt-3 p-2 rounded bg-blue-50 dark:bg-blue-950/30 text-xs text-blue-700 dark:text-blue-300 flex items-start gap-2">
@@ -263,11 +297,11 @@ export default function QuarterlyPage() {
                 </div>
                 {submissions.map((sub) => (
                   <div key={sub.id} className="grid grid-cols-7 text-sm items-center py-2 border-b border-muted/30" data-testid={`row-filing-${sub.id}`}>
-                    <span className="font-medium">Q{sub.quarter} {sub.taxYear}</span>
+                    <span className="font-medium">Q{sub.quarter} {sub.taxYear}{sub.jurisdiction === "UK" ? " (Apr–Apr)" : ""}</span>
                     <Badge variant="outline" className="w-fit text-xs">{sub.jurisdiction}</Badge>
-                    <span className="text-right">${Number(sub.totalIncome).toLocaleString()}</span>
-                    <span className="text-right text-destructive">${Number(sub.totalExpenses).toLocaleString()}</span>
-                    <span className="text-right font-medium">${Number(sub.netProfit).toLocaleString()}</span>
+                    <span className="text-right">{formatCurrency(Number(sub.totalIncome))}</span>
+                    <span className="text-right text-destructive">{formatCurrency(Number(sub.totalExpenses))}</span>
+                    <span className="text-right font-medium">{formatCurrency(Number(sub.netProfit))}</span>
                     <div className="text-center">{statusBadge(sub.status)}</div>
                     <div className="text-center">
                       {sub.status === "ready" && (

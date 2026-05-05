@@ -83,7 +83,7 @@ function StatusBadge({ status }: { status: string }) {
 export default function TaxOverviewPage() {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { isUS, isUK, formatCurrency } = useRegion();
+  const { isUS, isUK, isCA } = useRegion();
   const searchParams = useSearch();
   const params = new URLSearchParams(searchParams);
   const declarationSuccess = params.get("declaration") === "success";
@@ -214,9 +214,13 @@ export default function TaxOverviewPage() {
               Tax Year {selectedTaxYear} Summary
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {isUS
-                ? "Estimated balance based on federal + state tax brackets. Updates in real-time as you scan receipts."
-                : "Estimated balance based on England/Wales/NI tax bands. Updates in real-time as you scan receipts."}
+              {isUK
+                ? "Estimated balance based on England/Wales/NI tax bands (HMRC Self Assessment tax year April–April). Updates as you scan receipts."
+                : isCA
+                  ? "Estimated balance for Canadian self-employment (CRA T2125-oriented view). Calendar tax year."
+                  : isUS
+                    ? "Estimated balance based on federal + state tax brackets. Calendar tax year."
+                    : "Estimated balance based on your detected region. Updates as you scan receipts."}
             </p>
           </div>
           <Select value={selectedTaxYear} onValueChange={setSelectedTaxYear}>

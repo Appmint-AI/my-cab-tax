@@ -8,6 +8,7 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { authStorage } from "./storage";
 import { detectCountryFromIP } from "../../geo-detect";
+import { getClientIp } from "../../client-ip";
 
 /** OAuth callback / logout base URL (no trailing slash). Prefer env on Cloud Run so redirect_uri matches Auth0. */
 function getConfiguredPublicBaseUrl(): string | null {
@@ -370,7 +371,7 @@ export async function setupAuth(app: Express) {
 
           const userId = user.claims?.sub;
           if (userId) {
-            const clientIp = req.ip || req.socket.remoteAddress || "";
+              const clientIp = getClientIp(req) || "";
             try {
               let existingUser = await authStorage.getUser(userId);
               if (!existingUser) {
