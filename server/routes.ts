@@ -2448,7 +2448,11 @@ export async function registerRoutes(
     },
   );
 
-  const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "founder@mycabtax.com";
+  /** Comma-separated list; compared case-insensitively to `users.email`. */
+  const ADMIN_EMAILS = (process.env.ADMIN_EMAIL || "ibrahimmemon1709@gmail.com")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
 
   async function requireAdmin(req: Request, res: Response): Promise<boolean> {
     const userId = (req as any).user?.claims?.sub;
@@ -2457,8 +2461,12 @@ export async function registerRoutes(
       return false;
     }
     const user = await storage.getUser(userId);
-    if (!user || !user.email || user.email.toLowerCase() !== ADMIN_EMAIL) {
-      res.status(403).json({ message: "Forbidden" });
+    const email = user?.email?.trim().toLowerCase();
+    if (!user || !email || !ADMIN_EMAILS.includes(email)) {
+      res.status(403).json({
+        message: "Forbidden",
+        reason: "admin_required",
+      });
       return false;
     }
     return true;
