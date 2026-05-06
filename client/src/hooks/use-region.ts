@@ -85,7 +85,7 @@ export function useRegion() {
   const { data: regionConfig } = useQuery<RegionConfig>({
     queryKey: ["/api/user/region-config"],
     enabled: isAuthenticated,
-    staleTime: 1000 * 60 * 30,
+    staleTime: 1000 * 120,
   });
 
   const switchRegionMutation = useMutation({

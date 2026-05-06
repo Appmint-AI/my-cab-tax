@@ -551,9 +551,10 @@ function ManualCountryRegionSettings() {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          On first login we detect country from your IP address (behind Cloud Run this uses your real client IP, not the
-          server region). Browser GPS may also suggest updates. Set your filing home country here when you&apos;re abroad
-          or need a persistent override.
+          We detect country from your IP on first login (on Cloud Run your real client IP is used, not the server).
+          After that, we re-check when you navigate or refocus this tab — so switching VPN egress usually updates currency
+          and tax rules shortly (or click between two pages). Browser GPS may also suggest updates. Use the override below
+          if you always file in a different country than your current IP.
         </p>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <span className="text-muted-foreground">Active profile:</span>

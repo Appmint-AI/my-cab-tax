@@ -2579,6 +2579,57 @@ TOP STATES BY USER COUNT: ${topStates || "No state data available"}
     }
   });
 
+  /** Re-resolve country from current request IP (VPN / travel). Trust proxy + X-Forwarded-For must be correct on Cloud Run. */
+  app.post("/api/user/refresh-country-from-ip", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any).claims.sub;
+      const dbUser = await storage.getUser(userId);
+      if (!dbUser) return res.status(404).json({ message: "User not found" });
+
+      const ip = getClientIp(req);
+      if (!ip) {
+        return res.json({ updated: false, detectedCountry: dbUser.detectedCountry, reason: "no_client_ip" });
+      }
+
+      const { detectCountryFromIP, normalizeCountryCodeInput } = await import("./geo-detect");
+      const geo = await detectCountryFromIP(ip);
+      if (!geo?.countryCode) {
+        return res.json({
+          updated: false,
+          detectedCountry: dbUser.detectedCountry,
+          reason: "geo_unavailable",
+        });
+      }
+
+      const next = normalizeCountryCodeInput(geo.countryCode.trim());
+      const currentRaw = dbUser.detectedCountry?.trim().toUpperCase() || "";
+      const currentNorm = currentRaw === "UK" ? "GB" : currentRaw;
+
+      if (!next || next === currentNorm) {
+        return res.json({
+          updated: false,
+          detectedCountry: dbUser.detectedCountry,
+          inferredIso: next || geo.countryCode,
+          reason: "unchanged",
+        });
+      }
+
+      await storage.updateUser(userId, { detectedCountry: next });
+      const { getRegionConfig } = await import("./geo-detect");
+      const config = getRegionConfig(next);
+
+      res.json({
+        updated: true,
+        detectedCountry: next,
+        previousCountry: dbUser.detectedCountry,
+        countryName: geo.countryName,
+        regionConfig: config,
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // ==================== Simplified View Toggle ====================
 
   app.patch("/api/user/simplified-view", isAuthenticated, async (req: Request, res: Response) => {

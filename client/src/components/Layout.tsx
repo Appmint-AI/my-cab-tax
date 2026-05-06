@@ -34,6 +34,7 @@ import {
   CalendarClock,
   FileText,
 } from "lucide-react";
+import { useRefreshRegionFromIp } from "@/hooks/use-refresh-region-from-ip";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +55,8 @@ export function Layout({ children }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const segmentConfig = getSegmentConfig(user?.userSegment);
   const BrandIcon = user?.userSegment === "hybrid" ? Layers : user?.userSegment === "delivery" ? Package : CarFront;
+
+  useRefreshRegionFromIp();
 
   useEffect(() => {
     const segment = user?.userSegment || "taxi";
