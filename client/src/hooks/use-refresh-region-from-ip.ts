@@ -7,10 +7,12 @@ import i18n from "@/lib/i18n";
 import { REGION_DEFAULT_LANGUAGE } from "@/lib/i18n";
 
 const THROTTLE_MS = 12_000;
+/** Fallback when IP changes without navigation/focus (e.g. VPN switch while tab stays open). */
+const BACKGROUND_POLL_MS = 120_000;
 
 /**
  * Keeps `detectedCountry` aligned with the client's current egress IP (VPN-aware).
- * Runs when you navigate and when the tab regains focus — complements first-login IP geo.
+ * Runs on navigate, tab focus / visibility, network reconnect / link change, and periodic poll while visible.
  */
 export function useRefreshRegionFromIp() {
   const [location] = useLocation();
@@ -78,6 +80,43 @@ export function useRefreshRegionFromIp() {
     return () => {
       window.removeEventListener("focus", onResume);
       document.removeEventListener("visibilitychange", onResume);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user?.id]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+
+    const onOnline = () => {
+      lastAt.current = 0;
+      void ping(true);
+    };
+
+    /** Many VPN reconnects briefly drop the browser "online" state or change the underlying link. */
+    window.addEventListener("online", onOnline);
+
+    let connectionDebounced: ReturnType<typeof setTimeout> | undefined;
+    const conn = typeof navigator !== "undefined" ? (navigator as Navigator & { connection?: EventTarget }).connection : undefined;
+    const onConnectionChange = () => {
+      if (document.visibilityState !== "visible") return;
+      window.clearTimeout(connectionDebounced);
+      connectionDebounced = window.setTimeout(() => {
+        lastAt.current = 0;
+        void ping(true);
+      }, 1500);
+    };
+    conn?.addEventListener?.("change", onConnectionChange);
+
+    const poll = window.setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      void ping(false);
+    }, BACKGROUND_POLL_MS);
+
+    return () => {
+      window.removeEventListener("online", onOnline);
+      conn?.removeEventListener?.("change", onConnectionChange);
+      window.clearTimeout(connectionDebounced);
+      window.clearInterval(poll);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user?.id]);

@@ -2556,9 +2556,30 @@ TOP STATES BY USER COUNT: ${topStates || "No state data available"}
   app.get("/api/user/region-config", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userId = (req.user as any).claims.sub;
-      const user = await storage.getUser(userId);
-      const { getRegionConfig } = await import("./geo-detect");
-      const config = getRegionConfig(user?.detectedCountry);
+      let user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ message: "Not found" });
+
+      const {
+        getRegionConfig,
+        detectCountryFromIP,
+        normalizeCountryCodeInput,
+      } = await import("./geo-detect");
+
+      // No stored country: infer once from current request IP (VPN/client egress via trust proxy).
+      // GET still does not overwrite an existing detected_country — use POST /api/user/refresh-country-from-ip for that.
+      if (!user.detectedCountry) {
+        const ip = getClientIp(req);
+        if (ip) {
+          const geo = await detectCountryFromIP(ip);
+          if (geo?.countryCode) {
+            const next = normalizeCountryCodeInput(geo.countryCode.trim());
+            await storage.updateUser(userId, { detectedCountry: next });
+            user = { ...user, detectedCountry: next };
+          }
+        }
+      }
+
+      const config = getRegionConfig(user.detectedCountry);
       res.json(config);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
