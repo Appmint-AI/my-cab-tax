@@ -6,27 +6,136 @@ export interface GeoResult {
   countryName: string;
 }
 
-async function geoFromIpWhoIs(cleanIp: string): Promise<GeoResult | null> {
-  try {
-    const res = await fetch(`https://ipwho.is/${encodeURIComponent(cleanIp)}`, {
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as {
-      success?: boolean;
-      country_code?: string;
-      country?: string;
+const GEO_TIMEOUT_MS = 8_000;
+
+/** Some geo APIs throttle or reject Node’s default user agent. */
+const GEO_HEADERS: Record<string, string> = {
+  Accept: "application/json",
+  "User-Agent": "MyCabTax/1.0 (server-side geo lookup)",
+};
+
+async function geoFromBigDataCloud(cleanIp: string): Promise<GeoResult | null> {
+  const key =
+    process.env.BIGDATACLOUD_IP_GEO_KEY ||
+    "bdc_4422d41470b04a2eb0c50959ae1b8da0";
+  const url = `https://api.bigdatacloud.net/data/ip-geolocation?ip=${encodeURIComponent(cleanIp)}&localityLanguage=en&key=${encodeURIComponent(key)}`;
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(GEO_TIMEOUT_MS),
+    headers: GEO_HEADERS,
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  const iso = data?.country?.isoAlpha2;
+  const name = data?.country?.name;
+  if (
+    typeof iso === "string" &&
+    iso.length === 2 &&
+    typeof name === "string" &&
+    name.length > 0
+  ) {
+    return {
+      countryCode: iso.toUpperCase(),
+      countryName: name,
     };
-    if (data.success && data.country_code && data.country) {
-      return {
-        countryCode: String(data.country_code).toUpperCase(),
-        countryName: String(data.country),
-      };
-    }
-  } catch {
-    /* try next */
   }
   return null;
+}
+
+async function geoFromIpinfo(cleanIp: string): Promise<GeoResult | null> {
+  const token = process.env.IPINFO_ACCESS_TOKEN?.trim();
+  if (!token) return null;
+  const q = new URLSearchParams({ token }).toString();
+  const url = `https://ipinfo.io/${encodeURIComponent(cleanIp)}/json?${q}`;
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(GEO_TIMEOUT_MS),
+    headers: GEO_HEADERS,
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  const code =
+    typeof data.country === "string" ? data.country.trim().toUpperCase() : "";
+  const name =
+    typeof data.country_name === "string" && data.country_name.trim().length > 0
+      ? data.country_name.trim()
+      : code;
+  if (code.length === 2) {
+    return { countryCode: code, countryName: name };
+  }
+  return null;
+}
+
+async function geoFromIpApiCo(cleanIp: string): Promise<GeoResult | null> {
+  const url = `https://ipapi.co/${encodeURIComponent(cleanIp)}/json/`;
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(GEO_TIMEOUT_MS),
+    headers: GEO_HEADERS,
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (data?.error === true || data?.reason) return null;
+  const code = typeof data.country_code === "string" ? data.country_code.trim() : "";
+  const name =
+    typeof data.country_name === "string"
+      ? data.country_name.trim()
+      : typeof data.country_code === "string"
+        ? data.country_code.trim()
+        : "";
+  if (code.length === 2) {
+    return {
+      countryCode: code.toUpperCase(),
+      countryName: name.length > 0 ? name : code.toUpperCase(),
+    };
+  }
+  return null;
+}
+
+async function geoFromGeoJs(cleanIp: string): Promise<GeoResult | null> {
+  const url = `https://get.geojs.io/v1/ip/geo/${encodeURIComponent(cleanIp)}.json`;
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(GEO_TIMEOUT_MS),
+    headers: GEO_HEADERS,
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  const code =
+    typeof data.country_code === "string"
+      ? data.country_code.trim()
+      : "";
+  const name =
+    typeof data.country === "string" ? data.country.trim() : "";
+  if (code.length === 2 && name.length > 0) {
+    return { countryCode: code.toUpperCase(), countryName: name };
+  }
+  return code.length === 2
+    ? { countryCode: code.toUpperCase(), countryName: code.toUpperCase() }
+    : null;
+}
+
+async function geoFromIpWhoIs(cleanIp: string): Promise<GeoResult | null> {
+  const res = await fetch(
+    `https://ipwho.is/${encodeURIComponent(cleanIp)}`,
+    {
+      signal: AbortSignal.timeout(GEO_TIMEOUT_MS),
+      headers: GEO_HEADERS,
+    }
+  );
+  if (!res.ok) return null;
+  const data = (await res.json()) as Record<string, unknown>;
+  if (data.success === false) return null;
+  const code =
+    typeof data.country_code === "string"
+      ? data.country_code.trim()
+      : "";
+  const country =
+    typeof data.country === "string" ? data.country.trim() : "";
+  if (code.length !== 2) return null;
+  if (country.length > 0) {
+    return {
+      countryCode: code.toUpperCase(),
+      countryName: country,
+    };
+  }
+  return { countryCode: code.toUpperCase(), countryName: code.toUpperCase() };
 }
 
 export async function detectCountryFromIP(ip: string): Promise<GeoResult | null> {
@@ -34,45 +143,56 @@ export async function detectCountryFromIP(ip: string): Promise<GeoResult | null>
     if (isNonRoutableClientIpForGeo(ip)) {
       return null;
     }
-    const cleanIp = ip.replace(/^::ffff:/i, "").trim();
+    let cleanIp = ip.replace(/^::ffff:/i, "").trim();
+    if (cleanIp.startsWith("[") && cleanIp.endsWith("]")) {
+      cleanIp = cleanIp.slice(1, -1);
+    }
+    if (!cleanIp) return null;
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    /** Try providers in order; outbound HTTPS must be allowed in production. GeoJS/keyless first. */
+    const providers = [
+      geoFromGeoJs,
+      geoFromIpApiCo,
+      geoFromIpWhoIs,
+      geoFromBigDataCloud,
+      geoFromIpinfo,
+    ] as const;
 
-    const res = await fetch(
-      `https://api.bigdatacloud.net/data/ip-geolocation?ip=${encodeURIComponent(cleanIp)}&localityLanguage=en&key=bdc_4422d41470b04a2eb0c50959ae1b8da0`,
-      { signal: controller.signal }
-    );
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      const fallbackRes = await fetch(
-        `https://ipapi.co/${encodeURIComponent(cleanIp)}/json/`,
-        { signal: AbortSignal.timeout(5000) }
-      );
-      if (fallbackRes.ok) {
-        const data = await fallbackRes.json();
-        if (data.country_code && data.country_name) {
-          return { countryCode: data.country_code, countryName: data.country_name };
-        }
+    const errors: string[] = [];
+    for (const probe of providers) {
+      try {
+        const geo = await probe(cleanIp);
+        if (geo?.countryCode) return geo;
+      } catch (e: unknown) {
+        const msg =
+          e instanceof Error
+            ? e.message
+            : typeof e === "object" &&
+                e !== null &&
+                "message" in e &&
+                typeof (e as Error).message === "string"
+              ? (e as Error).message
+              : String(e);
+        errors.push(msg);
       }
-      return geoFromIpWhoIs(cleanIp);
     }
 
-    const data = await res.json();
-    if (data.country?.isoAlpha2 && data.country?.name) {
-      return {
-        countryCode: data.country.isoAlpha2,
-        countryName: data.country.name,
-      };
+    if (errors.length > 0) {
+      log(
+        `Geo: all providers exhausted (${cleanIp.includes(":") ? "IPv6" : "IPv4"}): ${errors
+          .slice(0, 4)
+          .join(" | ")}`,
+        "geo"
+      );
+    } else {
+      log(
+        `Geo: every provider returned empty (${cleanIp.includes(":") ? "IPv6" : "IPv4"})`,
+        "geo"
+      );
     }
-
-    const fromIpWho = await geoFromIpWhoIs(cleanIp);
-    if (fromIpWho) return fromIpWho;
-
     return null;
   } catch (error: any) {
-    log(`Geo detection failed for IP ${ip}: ${error.message}`, "geo");
+    log(`Geo detection failed for IP: ${error.message}`, "geo");
     return null;
   }
 }
