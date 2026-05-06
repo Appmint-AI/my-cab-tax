@@ -1,3 +1,4 @@
+import { isNonRoutableClientIpForGeo } from "./client-ip";
 import { log } from "./index";
 
 export interface GeoResult {
@@ -5,12 +6,35 @@ export interface GeoResult {
   countryName: string;
 }
 
+async function geoFromIpWhoIs(cleanIp: string): Promise<GeoResult | null> {
+  try {
+    const res = await fetch(`https://ipwho.is/${encodeURIComponent(cleanIp)}`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      success?: boolean;
+      country_code?: string;
+      country?: string;
+    };
+    if (data.success && data.country_code && data.country) {
+      return {
+        countryCode: String(data.country_code).toUpperCase(),
+        countryName: String(data.country),
+      };
+    }
+  } catch {
+    /* try next */
+  }
+  return null;
+}
+
 export async function detectCountryFromIP(ip: string): Promise<GeoResult | null> {
   try {
-    const cleanIp = ip.replace("::ffff:", "");
-    if (cleanIp === "127.0.0.1" || cleanIp === "::1" || cleanIp.startsWith("10.") || cleanIp.startsWith("192.168.")) {
+    if (isNonRoutableClientIpForGeo(ip)) {
       return null;
     }
+    const cleanIp = ip.replace(/^::ffff:/i, "").trim();
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
@@ -32,7 +56,7 @@ export async function detectCountryFromIP(ip: string): Promise<GeoResult | null>
           return { countryCode: data.country_code, countryName: data.country_name };
         }
       }
-      return null;
+      return geoFromIpWhoIs(cleanIp);
     }
 
     const data = await res.json();
@@ -42,6 +66,9 @@ export async function detectCountryFromIP(ip: string): Promise<GeoResult | null>
         countryName: data.country.name,
       };
     }
+
+    const fromIpWho = await geoFromIpWhoIs(cleanIp);
+    if (fromIpWho) return fromIpWho;
 
     return null;
   } catch (error: any) {
