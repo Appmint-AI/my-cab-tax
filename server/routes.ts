@@ -2449,7 +2449,7 @@ export async function registerRoutes(
   );
 
   /** Comma-separated list; compared case-insensitively to `users.email`. */
-  const ADMIN_EMAILS = (process.env.ADMIN_EMAIL || "ibrahimmemon1709@gmail.com")
+  const ADMIN_EMAILS = (process.env.ADMIN_EMAIL || "founder@mycabtax.com")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
