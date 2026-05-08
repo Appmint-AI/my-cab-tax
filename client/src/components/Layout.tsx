@@ -216,7 +216,7 @@ export function Layout({ children }: LayoutProps) {
         </Sheet>
       </div>
 
-      <main className="flex-1 lg:ml-64 p-4 lg:p-8 pt-20 lg:pt-8 w-full max-w-full overflow-x-hidden">
+      <main className="flex-1 lg:ml-64 p-4 lg:p-8 pt-20 lg:pt-8 pb-24 lg:pb-8 w-full max-w-full overflow-x-hidden">
         <div className="max-w-6xl mx-auto space-y-6">
           <RegionDetector />
           {children}

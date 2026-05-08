@@ -976,6 +976,7 @@ function VIPManagementSection() {
   const [searchEmail, setSearchEmail] = useState("");
   const [searchResults, setSearchResults] = useState<SearchedUser[]>([]);
   const [searching, setSearching] = useState(false);
+  const [lastSavedVipUserId, setLastSavedVipUserId] = useState<string | null>(null);
 
   const { data: vipUsers, refetch: refetchVip } = useQuery<VipUser[]>({
     queryKey: ["/api/admin/vip-users"],
@@ -1003,7 +1004,12 @@ function VIPManagementSection() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/vip-users"] });
-      toast({ title: data.isVip ? `VIP granted to ${data.email}` : `VIP revoked from ${data.email}` });
+      setLastSavedVipUserId(data.id);
+      window.setTimeout(() => setLastSavedVipUserId((current) => (current === data.id ? null : current)), 2200);
+      toast({
+        title: data.isVip ? `VIP granted to ${data.email}` : `VIP revoked from ${data.email}`,
+        description: "Changes were saved to the database.",
+      });
       if (searchEmail) handleSearch();
     },
     onError: (err: any) => {
@@ -1065,6 +1071,12 @@ function VIPManagementSection() {
                   <Crown className="h-3 w-3 mr-1" />
                   {u.isVip ? "Revoke VIP" : "Grant VIP"}
                 </Button>
+                {lastSavedVipUserId === u.id && (
+                  <span className="ml-2 inline-flex items-center text-xs text-green-600 dark:text-green-400">
+                    <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                    Saved
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -1095,6 +1107,12 @@ function VIPManagementSection() {
                   >
                     Revoke
                   </Button>
+                  {lastSavedVipUserId === u.id && (
+                    <span className="ml-2 inline-flex items-center text-xs text-green-600 dark:text-green-400">
+                      <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                      Saved
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
