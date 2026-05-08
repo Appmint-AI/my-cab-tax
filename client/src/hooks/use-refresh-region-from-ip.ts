@@ -9,6 +9,8 @@ import { REGION_DEFAULT_LANGUAGE } from "@/lib/i18n";
 const THROTTLE_MS = 12_000;
 /** Fallback when IP changes without navigation/focus (e.g. VPN switch while tab stays open). */
 const BACKGROUND_POLL_MS = 120_000;
+const SESSION_CHECK_KEY_PREFIX = "mct:region-session-check:";
+const RELOAD_ON_CHANGE_KEY_PREFIX = "mct:region-auto-reloaded:";
 
 /**
  * Keeps `detectedCountry` aligned with the client's current egress IP (VPN-aware).
@@ -53,6 +55,15 @@ export function useRefreshRegionFromIp() {
             ? `Using ${data.countryName} (${code}) from your current network. Override anytime under Settings → Home country.`
             : `Locale updated (${code}) from your connection.`,
         });
+
+        // Fallback for pages/components that only read locale-sensitive defaults at boot:
+        // perform one automatic refresh per user/session after a detected location shift.
+        const uid = user?.id || "anon";
+        const reloadKey = `${RELOAD_ON_CHANGE_KEY_PREFIX}${uid}`;
+        if (!sessionStorage.getItem(reloadKey)) {
+          sessionStorage.setItem(reloadKey, "1");
+          window.location.reload();
+        }
       }
     } catch {
       /* intermittent network — ignore */
@@ -64,6 +75,17 @@ export function useRefreshRegionFromIp() {
     void ping(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ping on route changes only via location dep
   }, [isAuthenticated, user?.id, location]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    const uid = user.id || "anon";
+    const sessionCheckKey = `${SESSION_CHECK_KEY_PREFIX}${uid}`;
+    if (sessionStorage.getItem(sessionCheckKey) === "1") return;
+    sessionStorage.setItem(sessionCheckKey, "1");
+    lastAt.current = 0;
+    void ping(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once per authenticated browser session/user
+  }, [isAuthenticated, user?.id]);
 
   useEffect(() => {
     if (!isAuthenticated || !user) return;
