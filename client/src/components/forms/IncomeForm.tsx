@@ -35,6 +35,7 @@ import { Plus, Loader2, Zap, Lock, DollarSign } from "lucide-react";
 import { z } from "zod";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { useRegion } from "@/hooks/use-region";
 import { getSegmentConfig } from "@/lib/segment-config";
 
 const formSchema = insertIncomeSchema.extend({
@@ -106,19 +107,26 @@ export function IncomeForm({ initialData, open: controlledOpen, onOpenChange: se
     }
   }, [initialData, form]);
 
+  const { user } = useAuth();
+  const { formatCurrency, isUK, currencySymbol, taxCopy, currency } = useRegion();
+  const segmentConfig = getSegmentConfig(user?.userSegment, user?.detectedCountry);
+  const sources = [...segmentConfig.incomeSources, "Tips", "Cash", "Other"];
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const submitValues = { ...values };
-    if (autoGrossMode && netPayout > 0) {
-      submitValues.description = submitValues.description || `Auto-Grossed from $${netPayout.toFixed(2)} net payout`;
+    if (autoGrossMode && netPayout > 0 && !isUK) {
+      submitValues.description =
+        submitValues.description ||
+        `Auto-Grossed from ${formatCurrency(netPayout)} net payout`;
     }
 
     if (initialData) {
       updateMutation.mutate(
-        { id: initialData.id, ...submitValues },
+        { id: initialData.id, ...submitValues, currency } as any,
         { onSuccess: () => setOpen(false) }
       );
     } else {
-      createMutation.mutate(submitValues, {
+      createMutation.mutate({ ...submitValues, currency } as any, {
         onSuccess: () => {
           setOpen(false);
           form.reset();
@@ -128,10 +136,6 @@ export function IncomeForm({ initialData, open: controlledOpen, onOpenChange: se
       });
     }
   };
-
-  const { user } = useAuth();
-  const segmentConfig = getSegmentConfig(user?.userSegment);
-  const sources = [...segmentConfig.incomeSources, "Tips", "Cash", "Other"];
 
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
@@ -150,7 +154,7 @@ export function IncomeForm({ initialData, open: controlledOpen, onOpenChange: se
           <DialogTitle>{initialData ? "Edit Income" : "Add New Income"}</DialogTitle>
         </DialogHeader>
 
-        {!initialData && (
+        {!initialData && !isUK && (
           <div className="flex items-center justify-between gap-2 p-3 rounded-md border border-border/60 bg-muted/30">
             <div className="flex items-center gap-2">
               {isPro ? (
@@ -178,7 +182,7 @@ export function IncomeForm({ initialData, open: controlledOpen, onOpenChange: se
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
-            {autoGrossMode && isPro ? (
+            {autoGrossMode && isPro && !isUK ? (
               <>
                 <div className="space-y-3">
                   <div>
@@ -238,7 +242,7 @@ export function IncomeForm({ initialData, open: controlledOpen, onOpenChange: se
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Gross Earnings ($)</FormLabel>
+                    <FormLabel>Gross earnings ({currencySymbol})</FormLabel>
                     <FormControl>
                       <Input 
                         data-testid="input-income-amount"
@@ -265,7 +269,7 @@ export function IncomeForm({ initialData, open: controlledOpen, onOpenChange: se
                       <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
                       <div>
                         <span className="text-sm font-medium">Tips / Gratuities</span>
-                        <p className="text-xs text-muted-foreground">2026: Tips are exempt from federal income tax</p>
+                        <p className="text-xs text-muted-foreground">{taxCopy.tipsComplianceNote}</p>
                       </div>
                     </div>
                     <FormControl>
@@ -307,7 +311,7 @@ export function IncomeForm({ initialData, open: controlledOpen, onOpenChange: se
                   name="platformFees"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Platform Fees ($)</FormLabel>
+                      <FormLabel>Platform fees ({currencySymbol})</FormLabel>
                       <FormControl>
                         <Input 
                           data-testid="input-income-fees"
@@ -349,28 +353,30 @@ export function IncomeForm({ initialData, open: controlledOpen, onOpenChange: se
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="payeeState"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>1099-K Payee State</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value ?? ""}>
-                    <FormControl>
-                      <SelectTrigger data-testid="select-income-payee-state">
-                        <SelectValue placeholder="State on 1099-K (optional)" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY","DC"].map((st) => (
-                        <SelectItem key={st} value={st}>{st}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isUK && (
+              <FormField
+                control={form.control}
+                name="payeeState"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>1099‑K payee state</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value ?? ""}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-income-payee-state">
+                          <SelectValue placeholder="State on 1099‑K (optional)" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY","DC"].map((st) => (
+                          <SelectItem key={st} value={st}>{st}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}

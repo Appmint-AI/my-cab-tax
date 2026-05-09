@@ -54,7 +54,7 @@ export default function ExpensesPage() {
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const { user } = useAuth();
-  const segmentConfig = getSegmentConfig(user?.userSegment);
+  const segmentConfig = getSegmentConfig(user?.userSegment, user?.detectedCountry);
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());

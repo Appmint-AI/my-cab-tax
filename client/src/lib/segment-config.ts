@@ -1,3 +1,5 @@
+import { normalizeDetectedCountry } from "@shared/regional-profile";
+
 export type UserSegment = "taxi" | "delivery" | "hybrid";
 
 export interface SegmentConfig {
@@ -128,10 +130,72 @@ const SEGMENT_CONFIGS: Record<UserSegment, SegmentConfig> = {
   hybrid: HYBRID_CONFIG,
 };
 
-export function getSegmentConfig(segment: UserSegment | string | null | undefined): SegmentConfig {
-  if (segment === "delivery") return SEGMENT_CONFIGS.delivery;
-  if (segment === "hybrid") return SEGMENT_CONFIGS.hybrid;
-  return SEGMENT_CONFIGS.taxi;
+const UK_SEGMENT_PATCH: Partial<Record<UserSegment, Partial<SegmentConfig>>> = {
+  taxi: {
+    proTips: [
+      "Track every trip — Approved Mileage Payments add up fast (45p/mile for the first 10,000 miles).",
+      "Surge and fares remain ordinary trading income for Self Assessment.",
+      "Licence and medical renewal receipts support allowable expenses.",
+      "Small passenger comforts may qualify — keep clear receipts.",
+    ],
+    vaultTips: [
+      "HMRC may ask for proof — snap licences and inspections when renewed.",
+      "Keep MOT/service receipts that relate to business mileage.",
+      "Photograph dashcam or safety gear purchases used wholly for work.",
+      "Monthly car wash/detailing receipts help justify upkeep claimed.",
+    ],
+  },
+  delivery: {
+    proTips: [
+      "Track mileage between pickups — Approved Mileage Payments apply when using your own vehicle.",
+      "Thermal bags, waterproof gear, and mounts often qualify as plant/tools.",
+      "Battery charging receipts matter when using EV bikes or scooters.",
+      "Split mileage logically when stacking apps.",
+    ],
+    vaultTips: [
+      "Save insulated bag purchases the same day you buy them.",
+      "Photograph charging or servicing receipts for work bikes/scooters.",
+      "Keep parking tickets tied clearly to delivery shifts.",
+      "Accessory mounts used exclusively for deliveries belong in the vault.",
+    ],
+  },
+  hybrid: {
+    proTips: [
+      "Across rides and deliveries, Approved Mileage Payments apply when you use your own car.",
+      "Keep fares plus gig payouts reconciled against statements — Self Assessment expects coherent totals.",
+      "Licences for taxi work and courier bags remain distinct deductions — tag receipts accordingly.",
+      "Split mileage fairly between rides vs courier repositioning when using multi-app stacks.",
+    ],
+    vaultTips: [
+      "Store TLC/medical renewal receipts beside courier thermal gear receipts.",
+      "Photograph weekly mileage habits rather than guessing later.",
+      "Separate vault folders per gig keeps HMRC enquiries faster to answer.",
+      "Insurance schedules naming gig usage deserve screenshots annually.",
+    ],
+  },
+};
+
+export function getSegmentConfig(
+  segment: UserSegment | string | null | undefined,
+  detectedCountry?: string | null,
+): SegmentConfig {
+  const key: UserSegment =
+    segment === "delivery"
+      ? "delivery"
+      : segment === "hybrid"
+        ? "hybrid"
+        : "taxi";
+  const base = SEGMENT_CONFIGS[key];
+  const iso = normalizeDetectedCountry(detectedCountry);
+  if (iso !== "GB") return base;
+  const patch = UK_SEGMENT_PATCH[key];
+  if (!patch) return base;
+  return {
+    ...base,
+    ...patch,
+    proTips: patch.proTips ?? base.proTips,
+    vaultTips: patch.vaultTips ?? base.vaultTips,
+  };
 }
 
 export function isValidSegment(value: unknown): value is UserSegment {

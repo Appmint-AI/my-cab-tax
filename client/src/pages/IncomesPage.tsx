@@ -34,7 +34,7 @@ export default function IncomesPage() {
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const { user } = useAuth();
-  const segmentConfig = getSegmentConfig(user?.userSegment);
+  const segmentConfig = getSegmentConfig(user?.userSegment, user?.detectedCountry);
 
   const filteredIncomes = incomes?.filter(i => 
     i.source.toLowerCase().includes(search.toLowerCase()) || 

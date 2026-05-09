@@ -15,12 +15,14 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { useRegion } from "@/hooks/use-region";
 import { AlertTriangle, Scale } from "lucide-react";
 
 const CURRENT_TERMS_VERSION = "1.0";
 
 export function TermsAcceptanceDialog() {
   const { user, isAuthenticated } = useAuth();
+  const { taxCopy, isUK } = useRegion();
   const queryClient = useQueryClient();
   const [agreed, setAgreed] = useState(false);
   const [dataRetentionAgreed, setDataRetentionAgreed] = useState(false);
@@ -45,7 +47,9 @@ export function TermsAcceptanceDialog() {
             Legal Consent Required
           </DialogTitle>
           <DialogDescription>
-            Please review and accept our terms to continue using My Cab Tax USA.
+            Please review and accept our terms to continue.{""}
+            {!isUK && " USA-region disclosures reference IRS publications."}
+            {isUK && " UK-region disclosures reference HMRC practice."}
           </DialogDescription>
         </DialogHeader>
 
@@ -60,7 +64,10 @@ export function TermsAcceptanceDialog() {
               <div>
                 <p className="font-semibold text-foreground text-sm mb-1">Tax Disclaimer</p>
                 <p className="text-xs">
-                  My Cab Tax USA is a <strong>bookkeeping tool only</strong>, NOT a tax advisory service. We do not provide tax, legal, or accounting advice. All calculations are estimates based on data you enter. You are solely responsible for the accuracy of your data and tax returns. <strong>Consult a qualified CPA or Tax Attorney before submitting any returns to the IRS.</strong>
+                  <strong>{taxCopy.appConsentBrandLine}</strong>{" "}
+                  We do not provide regulated tax, legal, or accounting advice. Calculations depend on information you supply,
+                  and you remain solely responsible for filing accuracy.
+                  <strong> {taxCopy.legalDisclaimerAuthority}</strong>
                 </p>
               </div>
             </div>
@@ -68,27 +75,39 @@ export function TermsAcceptanceDialog() {
             <div className="space-y-3">
               <div>
                 <p className="font-semibold text-foreground">Limitation of Liability</p>
-                <p>Our total liability shall not exceed the amount you paid in the last 12 months, or $100, whichever is less. We are not liable for any IRS audits, penalties, interest, or tax-related consequences resulting from your use of this app.</p>
+                <p>
+                  Detailed monetary caps appear in the full Terms (typically tied to fees paid).
+                  We are not liable for {taxCopy.limitationAuthorityPrefix}, penalties, interest, or related downstream losses stemming from use of the app.
+                </p>
               </div>
 
               <div className="flex items-start gap-2 p-3 rounded-md bg-muted/50 border border-border">
                 <Scale className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold text-foreground text-sm mb-1">Mandatory Arbitration Clause (Section 1.7)</p>
-                  <p className="text-xs">
-                    Any disputes arising from these Terms or the Service will be resolved through <strong>individual binding arbitration</strong> administered by the American Arbitration Association (AAA) under Delaware law. You waive your right to participate in a class-action lawsuit or class-wide arbitration. Either party may bring an individual action in small claims court. This clause survives termination of your account.
-                  </p>
+                  <p className="font-semibold text-foreground text-sm mb-1">{taxCopy.arbitrationHeading}</p>
+                  <p className="text-xs">{taxCopy.arbitrationBody}</p>
                 </div>
               </div>
 
               <div>
-                <p className="font-semibold text-foreground">Privacy Policy (GLBA & CCPA Compliant)</p>
-                <p>We collect your name, email, and financial data you enter to provide our services. We use industry-standard encryption. We do not sell your personal financial data to third parties. California residents have additional data rights under CCPA.</p>
+                <p className="font-semibold text-foreground">{taxCopy.privacyHeading}</p>
+                <ul className="list-disc pl-5 space-y-1 text-xs mt-1">
+                  {taxCopy.privacyBullets.map((line, idx) => (
+                    <li key={idx}>{line}</li>
+                  ))}
+                </ul>
               </div>
 
               <div>
-                <p className="font-semibold text-foreground">7-Year Secure Data Retention</p>
-                <p>Pro subscribers benefit from our Tax Vault with guaranteed 7-year data retention, exceeding the IRS minimum 3-year recordkeeping requirement. Free Tier users' data is retained while their account is active and subject to a 90-day inactivity deletion policy. All data is stored on encrypted cloud infrastructure with geographically redundant backups. You may request permanent deletion at any time via Settings.</p>
+                <p className="font-semibold text-foreground">{taxCopy.dataRetentionHeading}</p>
+                <p>{taxCopy.dataRetentionBody}</p>
+              </div>
+
+              <div className="text-xs space-y-1 border rounded-md p-3 bg-muted/20">
+                <p className="font-semibold text-foreground">{isUK ? "HMRC checkpoints" : "IRS checkpoints"}</p>
+                <p>{taxCopy.primaryEstimatedPayments}</p>
+                <p>{taxCopy.secondaryDeadlineNote}</p>
+                <p className="text-muted-foreground">{taxCopy.grossIncomeReportingHint}</p>
               </div>
             </div>
 

@@ -1248,7 +1248,7 @@ export default function Dashboard() {
   const { currencySymbol, isUK, isUS, taxModules, formatCurrency } = useRegion();
 
   const isFreeUser = !user?.subscriptionStatus || user.subscriptionStatus === "free" || user.subscriptionStatus === "basic";
-  const segmentConfig = getSegmentConfig(user?.userSegment);
+  const segmentConfig = getSegmentConfig(user?.userSegment, user?.detectedCountry);
 
   if (isLoading || !summary) {
     return (
@@ -1500,7 +1500,7 @@ export default function Dashboard() {
 
 function SegmentProTips() {
   const { user } = useAuth();
-  const segmentConfig = getSegmentConfig(user?.userSegment);
+  const segmentConfig = getSegmentConfig(user?.userSegment, user?.detectedCountry);
   const { data: subscription } = useSubscription();
   const isPro = subscription?.tier === "pro";
 

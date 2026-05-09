@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Layout } from "@/components/Layout";
 import { useMileageLogs, useCreateMileageLog, useDeleteMileageLog } from "@/hooks/use-mileage-logs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,11 +57,13 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertMileageLogSchema, IRS_MILEAGE_RATE, type MileageLog } from "@shared/schema";
+import { calculateHmrcMileageAllowanceGbp } from "@shared/regional-profile";
 import { z } from "zod";
 import { Plus, Loader2, Trash2, Car, MapPin, Calendar, TrendingUp, Search, MoreVertical, ArrowUpDown, LayoutList, LayoutGrid } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useTaxSummary } from "@/hooks/use-tax";
 import { useVehicles } from "@/hooks/use-vehicles";
+import { useRegion } from "@/hooks/use-region";
 
 const formSchema = insertMileageLogSchema.extend({
   totalMiles: z.coerce.number().positive("Miles must be positive"),
@@ -85,6 +87,7 @@ type SortDir = "asc" | "desc";
 export default function MileagePage() {
   const { data: logs, isLoading } = useMileageLogs();
   const { data: summary } = useTaxSummary();
+  const { isUK, formatCurrency, taxCopy } = useRegion();
   const [formOpen, setFormOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const [search, setSearch] = useState("");
@@ -93,7 +96,10 @@ export default function MileagePage() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   const totalLoggedMiles = logs?.reduce((sum, log) => sum + Number(log.totalMiles), 0) || 0;
-  const mileageDeduction = totalLoggedMiles * IRS_MILEAGE_RATE;
+  const mileageDeduction = useMemo(() => {
+    if (isUK) return calculateHmrcMileageAllowanceGbp(totalLoggedMiles);
+    return totalLoggedMiles * IRS_MILEAGE_RATE;
+  }, [isUK, totalLoggedMiles]);
 
   const filteredLogs = logs
     ?.filter(log =>
@@ -147,7 +153,7 @@ export default function MileagePage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-display font-bold" data-testid="text-mileage-title">Mileage Tracker</h1>
-          <p className="text-muted-foreground">IRS-compliant contemporaneous mileage log (Publication 463).</p>
+          <p className="text-muted-foreground">{taxCopy.mileageComplianceShort}</p>
         </div>
         <MileageLogForm open={formOpen} onOpenChange={setFormOpen} />
       </div>
@@ -170,16 +176,20 @@ export default function MileagePage() {
 
         <Card className="border-border/60 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Mileage Deduction</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{taxCopy.mileageDeductionLabel}</CardTitle>
             <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30">
               <MapPin className="h-4 w-4 text-green-600 dark:text-green-400" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold font-display" data-testid="text-mileage-deduction-value">
-              ${mileageDeduction.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatCurrency(mileageDeduction)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">at ${IRS_MILEAGE_RATE}/mi (IRS 2026 Standard Rate)</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {isUK
+                ? "45p/mi first 10,000 business miles • 25p/mi thereafter (cars/vans)"
+                : `At ${IRS_MILEAGE_RATE}/mi (IRS standard rate)`}
+            </p>
           </CardContent>
         </Card>
 
@@ -203,17 +213,35 @@ export default function MileagePage() {
         <CardContent className="flex items-start gap-3 py-3 px-4">
           <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-sm font-medium text-green-900 dark:text-green-200">
-                2026 IRS Standard Mileage Rate: ${IRS_MILEAGE_RATE}/mile
-              </p>
-              <Badge variant="outline" className="text-[10px] border-green-400 text-green-700 dark:text-green-300 no-default-active-elevate" data-testid="badge-mileage-rate">
-                Up 2.5&#162; from 2025
-              </Badge>
-            </div>
-            <p className="text-xs text-green-800/70 dark:text-green-300/70 mt-1 leading-relaxed">
-              The IRS increased the standard mileage rate to 72.5&#162; per business mile for 2026. This rate covers gas, insurance, depreciation, and maintenance. Keep contemporaneous records per IRS Pub. 463 to substantiate your deduction.
-            </p>
+            {isUK ? (
+              <>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-sm font-medium text-green-900 dark:text-green-200">
+                    HMRC Approved Mileage Payments — cars &amp; vans
+                  </p>
+                  <Badge variant="outline" className="text-[10px] border-green-400 text-green-700 dark:text-green-300 no-default-active-elevate" data-testid="badge-mileage-rate">
+                    45p / 25p bands
+                  </Badge>
+                </div>
+                <p className="text-xs text-green-800/70 dark:text-green-300/70 mt-1 leading-relaxed">
+                  Use 45p per business mile for the first 10,000 miles in the tax year, then 25p per mile thereafter. Keep contemporaneous records that identify each trip’s business purpose — consistent with HMRC guidance on simplified expenses.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-sm font-medium text-green-900 dark:text-green-200">
+                    2026 IRS Standard Mileage Rate: ${IRS_MILEAGE_RATE}/mile
+                  </p>
+                  <Badge variant="outline" className="text-[10px] border-green-400 text-green-700 dark:text-green-300 no-default-active-elevate" data-testid="badge-mileage-rate">
+                    Up 2.5&#162; from 2025
+                  </Badge>
+                </div>
+                <p className="text-xs text-green-800/70 dark:text-green-300/70 mt-1 leading-relaxed">
+                  The IRS increased the standard mileage rate to 72.5&#162; per business mile for 2026. This rate covers gas, insurance, depreciation, and maintenance. Keep contemporaneous records per IRS Pub. 463 to substantiate your deduction.
+                </p>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -312,14 +340,24 @@ export default function MileagePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredLogs.map((log) => (
-                  <MileageTableRow
-                    key={log.id}
-                    log={log}
-                    selected={selectedIds.has(log.id)}
-                    onToggleSelect={() => toggleSelect(log.id)}
-                  />
-                ))}
+                {filteredLogs.map((log) => {
+                  const tripMiles = Number(log.totalMiles);
+                  const rowDed =
+                    !isUK
+                      ? tripMiles * IRS_MILEAGE_RATE
+                      : totalLoggedMiles > 0
+                        ? (mileageDeduction * tripMiles) / totalLoggedMiles
+                        : 0;
+                  return (
+                    <MileageTableRow
+                      key={log.id}
+                      log={log}
+                      selected={selectedIds.has(log.id)}
+                      onToggleSelect={() => toggleSelect(log.id)}
+                      deductionDisplay={formatCurrency(rowDed)}
+                    />
+                  );
+                })}
               </TableBody>
             </Table>
             {selectedIds.size > 0 && (
@@ -328,9 +366,18 @@ export default function MileagePage() {
           </div>
         ) : (
           <CardContent className="space-y-2 pt-4">
-            {filteredLogs.map((log) => (
-              <MileageLogRow key={log.id} log={log} />
-            ))}
+            {filteredLogs.map((log) => {
+              const tripMiles = Number(log.totalMiles);
+              const rowDed =
+                !isUK
+                  ? tripMiles * IRS_MILEAGE_RATE
+                  : totalLoggedMiles > 0
+                    ? (mileageDeduction * tripMiles) / totalLoggedMiles
+                    : 0;
+              return (
+                <MileageLogRow key={log.id} log={log} deductionDisplay={formatCurrency(rowDed)} />
+              );
+            })}
           </CardContent>
         )}
       </Card>
@@ -338,7 +385,9 @@ export default function MileagePage() {
       <Card className="border-border/60 shadow-sm mt-4">
         <CardContent className="py-4">
           <p className="text-xs text-muted-foreground leading-relaxed" data-testid="text-mileage-irs-notice">
-            The IRS requires a contemporaneous record of business miles driven. Each entry should include the date, business purpose, and total miles. Odometer readings are recommended but not required. My Cab Tax USA uses the Standard Mileage Rate method (${IRS_MILEAGE_RATE}/mi for 2026) per IRS Publication 463. Drivers should cross-reference logs with their vehicle's odometer.
+            {isUK
+              ? "HMRC expects contemporaneous mileage evidence with a clear business purpose for each trip. Odometer readings strengthen your records. My Cab Tax allocates Approved Mileage Payments using the statutory 45p / 25p bands across your logged business miles for the year."
+              : `The IRS requires a contemporaneous record of business miles driven. Each entry should include the date, business purpose, and total miles. Odometer readings are recommended but not required. My Cab Tax applies the standard mileage method (${IRS_MILEAGE_RATE}/mi for 2026) per IRS Publication 463.`}
           </p>
         </CardContent>
       </Card>
@@ -346,9 +395,18 @@ export default function MileagePage() {
   );
 }
 
-function MileageTableRow({ log, selected, onToggleSelect }: { log: MileageLog; selected: boolean; onToggleSelect: () => void }) {
+function MileageTableRow({
+  log,
+  selected,
+  onToggleSelect,
+  deductionDisplay,
+}: {
+  log: MileageLog;
+  selected: boolean;
+  onToggleSelect: () => void;
+  deductionDisplay: string;
+}) {
   const deleteMutation = useDeleteMileageLog();
-  const deduction = Number(log.totalMiles) * IRS_MILEAGE_RATE;
 
   return (
     <TableRow className="group hover:bg-muted/30" data-testid={`row-mileage-${log.id}`}>
@@ -379,7 +437,7 @@ function MileageTableRow({ log, selected, onToggleSelect }: { log: MileageLog; s
         {Number(log.totalMiles).toLocaleString(undefined, { maximumFractionDigits: 1 })}
       </TableCell>
       <TableCell className="text-right font-mono text-muted-foreground hidden md:table-cell">
-        ${deduction.toFixed(2)}
+        {deductionDisplay}
       </TableCell>
       <TableCell>
         <DropdownMenu>
@@ -452,7 +510,7 @@ function BulkActions({ selectedIds, onClear }: { selectedIds: Set<number>; onCle
   );
 }
 
-function MileageLogRow({ log }: { log: MileageLog }) {
+function MileageLogRow({ log, deductionDisplay }: { log: MileageLog; deductionDisplay: string }) {
   const deleteMutation = useDeleteMileageLog();
 
   return (
@@ -465,7 +523,7 @@ function MileageLogRow({ log }: { log: MileageLog }) {
         </div>
         <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
           <span>{Number(log.totalMiles).toLocaleString(undefined, { maximumFractionDigits: 1 })} miles</span>
-          <span>${(Number(log.totalMiles) * IRS_MILEAGE_RATE).toFixed(2)} deduction</span>
+          <span>{deductionDisplay}</span>
           {log.startOdometer && log.endOdometer && (
             <span>Odometer: {Number(log.startOdometer).toLocaleString()} - {Number(log.endOdometer).toLocaleString()}</span>
           )}

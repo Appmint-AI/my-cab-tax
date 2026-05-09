@@ -23,6 +23,7 @@ import {
 } from "./receipt-vault";
 import { scanReceiptWithAI } from "./receipt-ocr";
 import { getClientIp, isNonRoutableClientIpForGeo } from "./client-ip";
+import { applyExpenseIncomeAnchors } from "./bookkeeping-currency";
 
 const UPLOADS_DIR = path.join(process.cwd(), "uploads", "receipts");
 
@@ -148,22 +149,15 @@ export async function registerRoutes(
       const lockMsg = await checkYearLock(userId, input.date);
       if (lockMsg)
         return res.status(403).json({ message: lockMsg, locked: true });
-      const expenseData: any = { ...input, userId };
-      const reqCurrency = req.body.currency || input.anchorCurrency;
-      if (reqCurrency && reqCurrency !== "USD") {
-        try {
-          const { getRate } = await import("./currency-engine");
-          const rate = await getRate(reqCurrency, "USD");
-          if (rate) {
-            expenseData.anchorCurrency = reqCurrency;
-            expenseData.anchoredUsdAmount = String(
-              Number((parseFloat(String(input.amount)) * rate).toFixed(2)),
-            );
-            expenseData.anchoredAt = new Date();
-          }
-        } catch {}
-      }
-      const expense = await storage.createExpense(expenseData);
+      const expenseData: Record<string, unknown> = { ...input, userId };
+      await applyExpenseIncomeAnchors(
+        storage,
+        userId,
+        Number(input.amount),
+        req.body as Record<string, unknown>,
+        expenseData,
+      );
+      const expense = await storage.createExpense(expenseData as any);
       res.status(201).json(expense);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -193,21 +187,34 @@ export async function registerRoutes(
     try {
       const userId = (req.user as any).claims.sub;
       const existing = await storage.getExpense(Number(req.params.id));
-      if (existing) {
-        const lockMsg = await checkYearLock(userId, existing.date);
-        if (lockMsg)
-          return res.status(403).json({ message: lockMsg, locked: true });
+      if (!existing) {
+        return res.status(404).json({ message: "Expense not found" });
       }
+      const lockMsgExisting = await checkYearLock(userId, existing.date);
+      if (lockMsgExisting)
+        return res.status(403).json({ message: lockMsgExisting, locked: true });
       const input = api.expenses.update.input.parse(req.body);
       if (input.date) {
         const lockMsg2 = await checkYearLock(userId, input.date);
         if (lockMsg2)
           return res.status(403).json({ message: lockMsg2, locked: true });
       }
+      const amt =
+        input.amount !== undefined
+          ? Number(input.amount)
+          : Number(existing.amount);
+      const merge: Record<string, unknown> = { ...input };
+      await applyExpenseIncomeAnchors(
+        storage,
+        userId,
+        amt,
+        req.body as Record<string, unknown>,
+        merge,
+      );
       const updated = await storage.updateExpense(
         userId,
         Number(req.params.id),
-        input,
+        merge as any,
       );
       if (!updated) {
         return res.status(404).json({ message: "Expense not found" });
@@ -250,22 +257,15 @@ export async function registerRoutes(
       const lockMsg = await checkYearLock(userId, input.date);
       if (lockMsg)
         return res.status(403).json({ message: lockMsg, locked: true });
-      const incomeData: any = { ...input, userId };
-      const reqCurrency = req.body.currency || input.anchorCurrency;
-      if (reqCurrency && reqCurrency !== "USD") {
-        try {
-          const { getRate } = await import("./currency-engine");
-          const rate = await getRate(reqCurrency, "USD");
-          if (rate) {
-            incomeData.anchorCurrency = reqCurrency;
-            incomeData.anchoredUsdAmount = String(
-              Number((parseFloat(String(input.amount)) * rate).toFixed(2)),
-            );
-            incomeData.anchoredAt = new Date();
-          }
-        } catch {}
-      }
-      const income = await storage.createIncome(incomeData);
+      const incomeData: Record<string, unknown> = { ...input, userId };
+      await applyExpenseIncomeAnchors(
+        storage,
+        userId,
+        Number(input.amount),
+        req.body as Record<string, unknown>,
+        incomeData,
+      );
+      const income = await storage.createIncome(incomeData as any);
       res.status(201).json(income);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -294,21 +294,34 @@ export async function registerRoutes(
     try {
       const userId = (req.user as any).claims.sub;
       const existing = await storage.getIncome(Number(req.params.id));
-      if (existing) {
-        const lockMsg = await checkYearLock(userId, existing.date);
-        if (lockMsg)
-          return res.status(403).json({ message: lockMsg, locked: true });
+      if (!existing) {
+        return res.status(404).json({ message: "Income not found" });
       }
+      const lockMsgExistingInc = await checkYearLock(userId, existing.date);
+      if (lockMsgExistingInc)
+        return res.status(403).json({ message: lockMsgExistingInc, locked: true });
       const input = api.incomes.update.input.parse(req.body);
       if (input.date) {
         const lockMsg2 = await checkYearLock(userId, input.date);
         if (lockMsg2)
           return res.status(403).json({ message: lockMsg2, locked: true });
       }
+      const amt =
+        input.amount !== undefined
+          ? Number(input.amount)
+          : Number(existing.amount);
+      const merge: Record<string, unknown> = { ...input };
+      await applyExpenseIncomeAnchors(
+        storage,
+        userId,
+        amt,
+        req.body as Record<string, unknown>,
+        merge,
+      );
       const updated = await storage.updateIncome(
         userId,
         Number(req.params.id),
-        input,
+        merge as any,
       );
       if (!updated) {
         return res.status(404).json({ message: "Income not found" });

@@ -2,8 +2,13 @@ import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./use-auth";
 import { apiRequest } from "@/lib/queryClient";
+import {
+  regionalTaxStrings,
+  type RegionalTaxStrings,
+  type RegionType,
+} from "@shared/regional-profile";
 
-export type RegionType = "US" | "UK" | "CA" | "MX" | "NO" | "SE" | "DK" | "EU" | "MY" | "CN" | "ID" | "BR" | "ZA" | "NG" | "OTHER";
+export type { RegionType } from "@shared/regional-profile";
 
 export interface RegionConfig {
   region: RegionType;
@@ -108,6 +113,11 @@ export function useRegion() {
     return DEFAULT_US_CONFIG;
   }, [regionConfig, inferred]);
 
+  const taxCopy: RegionalTaxStrings = useMemo(
+    () => regionalTaxStrings(config.region),
+    [config.region],
+  );
+
   const formatCurrency = (amount: number): string => {
     try {
       return new Intl.NumberFormat(config.locale, {
@@ -138,6 +148,7 @@ export function useRegion() {
 
   return {
     ...config,
+    taxCopy,
     isUK,
     isUS,
     isCA,

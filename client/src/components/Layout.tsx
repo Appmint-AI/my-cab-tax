@@ -53,7 +53,7 @@ export function Layout({ children }: LayoutProps) {
   const { t, i18n } = useTranslation();
   const { isUK, isUS, isCA, isMX, taxModules, region, currencySymbol, flag } = useRegion();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const segmentConfig = getSegmentConfig(user?.userSegment);
+  const segmentConfig = getSegmentConfig(user?.userSegment, user?.detectedCountry);
   const BrandIcon = user?.userSegment === "hybrid" ? Layers : user?.userSegment === "delivery" ? Package : CarFront;
 
   useRefreshRegionFromIp();

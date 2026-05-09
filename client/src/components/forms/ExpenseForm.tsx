@@ -32,6 +32,7 @@ import { Plus, Loader2, Info, Lightbulb } from "lucide-react";
 import { z } from "zod";
 import { SALT_DEDUCTION_CAP } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
+import { useRegion } from "@/hooks/use-region";
 import { getSegmentConfig } from "@/lib/segment-config";
 
 const formSchema = insertExpenseSchema.extend({
@@ -81,21 +82,9 @@ export function ExpenseForm({ initialData, open: controlledOpen, onOpenChange: s
     }
   }, [initialData, form]);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    if (initialData) {
-      updateMutation.mutate(
-        { id: initialData.id, ...values },
-        { onSuccess: () => setOpen(false) }
-      );
-    } else {
-      createMutation.mutate(values, {
-        onSuccess: () => {
-          setOpen(false);
-          form.reset();
-        },
-      });
-    }
-  };
+  const { user } = useAuth();
+  const { isUK, currency, currencySymbol } = useRegion();
+  const segmentConfig = getSegmentConfig(user?.userSegment, user?.detectedCountry);
 
   const categories = [
     "Car and Truck Expenses",
@@ -109,8 +98,22 @@ export function ExpenseForm({ initialData, open: controlledOpen, onOpenChange: s
     "Other Expenses",
   ];
 
-  const { user } = useAuth();
-  const segmentConfig = getSegmentConfig(user?.userSegment);
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    const payload = { ...values, currency };
+    if (initialData) {
+      updateMutation.mutate(
+        { id: initialData.id, ...payload } as any,
+        { onSuccess: () => setOpen(false) }
+      );
+    } else {
+      createMutation.mutate(payload as any, {
+        onSuccess: () => {
+          setOpen(false);
+          form.reset();
+        },
+      });
+    }
+  };
 
   const selectedCategory = form.watch("category");
   const isSaltCategory = selectedCategory === "Property Tax (SALT)" || selectedCategory === "Home Office";
@@ -179,7 +182,7 @@ export function ExpenseForm({ initialData, open: controlledOpen, onOpenChange: s
               )}
             />
 
-            {isSaltCategory && (
+            {isSaltCategory && !isUK && (
               <div className="flex items-start gap-2 p-3 rounded-md border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20" data-testid="info-salt-cap">
                 <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div>

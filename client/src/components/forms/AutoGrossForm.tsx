@@ -33,6 +33,7 @@ import { useState } from "react";
 import { Loader2, Lock, Crown, Zap, ArrowRight, Info } from "lucide-react";
 import { z } from "zod";
 import { Link } from "wouter";
+import { useRegion } from "@/hooks/use-region";
 
 const autoGrossSchema = z.object({
   netPayout: z.coerce.number().positive("Net payout must be positive"),
@@ -78,6 +79,8 @@ export function AutoGrossForm() {
   };
 
   const sources = ["Uber", "Lyft"];
+  const { isUK } = useRegion();
+  if (isUK) return null;
 
   if (!isPro) {
     return (

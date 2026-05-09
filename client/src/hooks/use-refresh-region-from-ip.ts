@@ -5,12 +5,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import i18n from "@/lib/i18n";
 import { REGION_DEFAULT_LANGUAGE } from "@/lib/i18n";
+import { normalizeDetectedCountry } from "@shared/regional-profile";
 
 const THROTTLE_MS = 12_000;
 /** Fallback when IP changes without navigation/focus (e.g. VPN switch while tab stays open). */
 const BACKGROUND_POLL_MS = 120_000;
 const SESSION_CHECK_KEY_PREFIX = "mct:region-session-check:";
-const RELOAD_ON_CHANGE_KEY_PREFIX = "mct:region-auto-reloaded:";
+const RELOAD_DEBOUNCE_MS = 4_000;
 
 /**
  * Keeps `detectedCountry` aligned with the client's current egress IP (VPN-aware).
@@ -37,6 +38,7 @@ export function useRefreshRegionFromIp() {
       const data = (await res.json()) as {
         updated?: boolean;
         detectedCountry?: string;
+        previousCountry?: string | null;
         countryName?: string;
       };
 
@@ -56,13 +58,17 @@ export function useRefreshRegionFromIp() {
             : `Locale updated (${code}) from your connection.`,
         });
 
-        // Fallback for pages/components that only read locale-sensitive defaults at boot:
-        // perform one automatic refresh per user/session after a detected location shift.
-        const uid = user?.id || "anon";
-        const reloadKey = `${RELOAD_ON_CHANGE_KEY_PREFIX}${uid}`;
-        if (!sessionStorage.getItem(reloadKey)) {
-          sessionStorage.setItem(reloadKey, "1");
-          window.location.reload();
+        const prevIso = normalizeDetectedCountry(data.previousCountry ?? "");
+        const nextIso = normalizeDetectedCountry(data.detectedCountry ?? "");
+        if (prevIso !== nextIso) {
+          const uid = user?.id || "anon";
+          const debKey = `mct:region-reload-debounce:${uid}`;
+          const last = Number(sessionStorage.getItem(debKey) || 0);
+          const now = Date.now();
+          if (now - last >= RELOAD_DEBOUNCE_MS) {
+            sessionStorage.setItem(debKey, String(now));
+            window.location.reload();
+          }
         }
       }
     } catch {

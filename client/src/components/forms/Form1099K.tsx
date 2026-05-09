@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertIncomeSchema } from "@shared/schema";
 import { useCreateIncome } from "@/hooks/use-incomes";
+import { useRegion } from "@/hooks/use-region";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -51,6 +52,8 @@ export function Form1099K() {
   const grossAmount = form.watch("amount") || 0;
   const fees = form.watch("platformFees") || 0;
   const estimatedNet = Math.max(0, Number(grossAmount) - Number(fees));
+  const { isUK } = useRegion();
+  if (isUK) return null;
 
   const onSubmit = (values: z.infer<typeof form1099KSchema>) => {
     createMutation.mutate(

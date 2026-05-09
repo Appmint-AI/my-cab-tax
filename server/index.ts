@@ -10,8 +10,15 @@ import { startForexSyncWorker } from "./currency-engine";
 import { startReferralWorker } from "./referral-worker";
 
 const app = express();
-// Cloud Run / load balancers: trust X-Forwarded-* so req.protocol, req.hostname, and OAuth URLs match the public HTTPS URL
-app.set("trust proxy", true);
+// Cloud Run / load balancers: trust X-Forwarded-* so req.protocol, req.hostname, and OAuth URLs match the public HTTPS URL.
+// Optional TRUST_PROXY_HOPS (e.g. "1") when only one hop must be trusted.
+const trustProxyEnv = process.env.TRUST_PROXY_HOPS;
+app.set(
+  "trust proxy",
+  trustProxyEnv !== undefined && trustProxyEnv !== ""
+    ? Number(trustProxyEnv)
+    : true,
+);
 const httpServer = createServer(app);
 
 declare module "http" {
@@ -107,6 +114,43 @@ app.get("/health", (_req, res) => {
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || "development",
   });
+});
+
+/** QuickBooks / Intuit Developer Portal URL placeholders (OAuth wiring can be completed later). */
+function publicAppUrl(): string {
+  const raw =
+    process.env.APP_URL ||
+    process.env.AUTH0_BASE_URL ||
+    "";
+  return raw.replace(/\/$/, "");
+}
+
+/** OAuth redirect / launch landing — register this as Redirect URI in Intuit. */
+app.get("/oauth/intuit/callback", (req, res) => {
+  const base = publicAppUrl();
+  if (!base) {
+    return res
+      .status(503)
+      .send("Configure APP_URL for OAuth redirect targets.");
+  }
+  const forward = new URLSearchParams(req.query as Record<string, string>).toString();
+  res.redirect(
+    `${base}/settings?intuit_oauth=callback${forward ? `&${forward}` : ""}`,
+  );
+});
+
+/** Entry URL documented as “Connect / Reconnect” — lands in SPA Settings integrations. */
+app.get("/oauth/intuit/start", (_req, res) => {
+  const base = publicAppUrl();
+  if (!base) {
+    return res.status(503).send("Configure APP_URL for OAuth entry URL.");
+  }
+  res.redirect(`${base}/settings?intuit_oauth=start`);
+});
+
+/** Disconnect webhook target Intuit may POST to when a firm disconnects the app. */
+app.post("/api/webhooks/intuit/disconnect", (_req, res) => {
+  res.status(200).json({ ok: true });
 });
 
 (async () => {
